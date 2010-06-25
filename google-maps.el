@@ -311,8 +311,7 @@ image."
 (defun google-maps-quit ()
   "Kill Google maps buffer."
   (interactive)
-  (kill-buffer)
-  (delete-window))
+  (kill-buffer))
 
 (defun google-maps-copy-url ()
   "Kill Google maps buffer."
