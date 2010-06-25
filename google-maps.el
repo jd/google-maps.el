@@ -87,23 +87,31 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-url)
 
+(defun google-maps-urlencode-properties (marker-or-path properties)
+  "Build a | separated url fragment from MARKER-OR-PATH, adding
+in each element of PROPERTIES."
+  (let* ((location-list (car marker-or-path))
+         (plist (cdr marker-or-path))
+         props)
+    (dolist (p properties)
+      (let* ((prop (intern-soft (concat ":" (symbol-name p))))
+             (value (plist-get plist prop)))
+        (when value
+          (add-to-list 'props
+                       (format "%s:%s"
+                               p (cond ((symbolp value)
+                                        (symbol-name value))
+                                       ;; Special case for `label'
+                                       ('(eq prop :label)
+                                        (char-to-string value))
+                                       (t value))
+                               value)))))
+    (concat (mapconcat 'identity props "|")
+            (when props "|")
+            (mapconcat 'url-hexify-string location-list "|"))))
+
 (defun google-maps-marker-to-url-parameters (marker)
-  (let* ((location-list (car marker))
-         (plist (cdr marker))
-         (size (and plist (plist-get plist :size)))
-         (color (and plist (plist-get plist :color)))
-         (label (and plist (plist-get plist :label))))
-    (concat ""
-     (if color
-         (format "color:%s|" color)
-       "")
-     (if label
-         (format "label:%c|" label)
-       "")
-     (if size
-         (format "size:%s|" (symbol-name size))
-       "")
-     (mapconcat 'url-hexify-string location-list "|"))))
+  (google-maps-urlencode-properties marker '(size color label)))
 
 (defun google-maps-markers-to-url-parameters (markers)
   "From MARKERS, build parameters for a Google Static Maps URL.
@@ -121,22 +129,7 @@ VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
              "|"))
 
 (defun google-maps-path-to-url-parameters (path)
-  (let* ((location-list (car path))
-         (plist (cdr path))
-         (weight (and plist (plist-get plist :weight)))
-         (color (and plist (plist-get plist :color)))
-         (fillcolor (and plist (plist-get plist :fillcolor))))
-    (concat ""
-     (if color
-         (format "color:%s|" color)
-       "")
-     (if weight
-         (format "weight:%d|" weight)
-       "")
-     (if fillcolor
-         (format "fillcolor:%s|" fillcolor)
-       "")
-     (mapconcat 'url-hexify-string location-list "|"))))
+  (google-maps-urlencode-properties path '(weight color fillcolor)))
 
 (defun google-maps-paths-to-url-parameters (paths)
   "From PATH, build parameters for a Google Static Maps URL.
