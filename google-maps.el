@@ -252,17 +252,29 @@ image."
        (google-maps-retrieve-image google-maps-url)
        (plist-get plist :format)))))
 
-;; Major mode definition
-(defun google-maps-mode ()
-  "Major mode for Google Maps buffer."
-  (interactive)
-  (kill-all-local-variables)
+(defvar google-maps-mode-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map (kbd "+") 'google-maps-zoom-in)
+    (define-key map (kbd "-") 'google-maps-zoom-out)
+    (define-key map (kbd "z") 'google-maps-zoom)
+    (define-key map (kbd "q") 'google-maps-quit)
+    (define-key map (kbd "w") 'google-maps-copy-url)
+    (define-key map (kbd "m") 'google-maps-manage-marker)
+    (define-key map (kbd "v") 'google-maps-manage-visible)
+    (define-key map (kbd "c") 'google-maps-center)
+    (define-key map (kbd "t") 'google-maps-set-maptype)
+    (define-key map (kbd "g") 'google-maps-reset-size)
+    (define-key map [mouse-4] 'google-maps-zoom-mouse-in)
+    (define-key map [mouse-5] 'google-maps-zoom-mouse-out)
+    map)
+  "Keymap for `google-maps-mode'.")
+
+;;;###autoload
+(define-derived-mode google-maps-mode fundamental-mode "Google Maps"
+  "A major mode for Google Maps service"
+  :group 'comm
   (setq cursor-type nil)
-  (setq buffer-read-only t)
-  (use-local-map google-maps-mode-map)
-  (setq mode-name "Google Maps")
-  (setq major-mode 'google-maps-mode)
-  (run-mode-hooks 'google-maps-mode-hook))
+  (setq buffer-read-only t))
 
 (defun google-maps-zoom (level)
   "Zoom a Google map."
@@ -402,18 +414,6 @@ string, it will remove centering."
   (let ((plist google-maps-params))
     (plist-put plist :maptype maptype)
     (apply 'google-maps-show plist)))
-
-(define-key google-maps-mode-map "+" 'google-maps-zoom-in)
-(define-key google-maps-mode-map "-" 'google-maps-zoom-out)
-(define-key google-maps-mode-map "z" 'google-maps-zoom)
-(define-key google-maps-mode-map "q" 'google-maps-quit)
-(define-key google-maps-mode-map "w" 'google-maps-copy-url)
-(define-key google-maps-mode-map "m" 'google-maps-manage-marker)
-(define-key google-maps-mode-map "v" 'google-maps-manage-visible)
-(define-key google-maps-mode-map "c" 'google-maps-center)
-(define-key google-maps-mode-map "t" 'google-maps-set-maptype)
-(define-key google-maps-mode-map [mouse-4] 'google-maps-zoom-mouse-in)
-(define-key google-maps-mode-map [mouse-5] 'google-maps-zoom-mouse-out)
 
 (defun google-maps (location)
   "Run Google Maps on LOCATION."
