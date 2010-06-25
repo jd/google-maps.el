@@ -146,6 +146,18 @@ PATHS should have the form
              paths
              "&path="))
 
+(defun google-maps-set-size (plist)
+  "adapt size to current window settings"
+  (let ((edges (window-inside-pixel-edges)))
+    (plist-put plist :width (- (nth 2 edges) (nth 0 edges) ))
+    (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))
+    plist))
+
+(defun google-maps-refresh ()
+  "Redisplay the map."
+  (interactive)
+  (apply 'google-maps-show google-maps-params))
+
 (defun google-maps-build-plist (plist)
   "Build a property list based on PLIST."
   ;; Make all markers upper case
@@ -160,11 +172,7 @@ PATHS should have the form
                   markers))))
   (unless (plist-member plist :sensor)
     (plist-put plist :sensor google-maps-default-sensor))
-  (let ((edges (window-inside-pixel-edges)))
-    (unless (plist-member plist :width)
-      (plist-put plist :width (- (nth 2 edges) (nth 0 edges) )))
-    (unless (plist-member plist :height)
-      (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))))
+  (google-maps-set-size plist)
   plist)
 
 (defun google-maps-build-url (plist)
@@ -263,7 +271,7 @@ image."
     (define-key map (kbd "v") 'google-maps-manage-visible)
     (define-key map (kbd "c") 'google-maps-center)
     (define-key map (kbd "t") 'google-maps-set-maptype)
-    (define-key map (kbd "g") 'google-maps-reset-size)
+    (define-key map (kbd "g") 'google-maps-refresh)
     (define-key map [mouse-4] 'google-maps-zoom-mouse-in)
     (define-key map [mouse-5] 'google-maps-zoom-mouse-out)
     map)
