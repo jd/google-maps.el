@@ -263,7 +263,11 @@ image."
 (defvar google-maps-mode-map
   (let ((map (make-sparse-keymap)))
     (define-key map (kbd "+") 'google-maps-zoom-in)
+    (define-key map (kbd ">") 'google-maps-zoom-in)
+    (define-key map (kbd ".") 'google-maps-zoom-in)
     (define-key map (kbd "-") 'google-maps-zoom-out)
+    (define-key map (kbd "<") 'google-maps-zoom-out)
+    (define-key map (kbd ",") 'google-maps-zoom-out)
     (define-key map (kbd "z") 'google-maps-zoom)
     (define-key map (kbd "q") 'google-maps-quit)
     (define-key map (kbd "w") 'google-maps-copy-url)
