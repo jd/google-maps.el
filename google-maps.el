@@ -83,25 +83,29 @@
 
 (defun google-maps-urlencode-properties (marker-or-path properties)
   "Build a | separated url fragment from MARKER-OR-PATH, adding
-in each element of PROPERTIES."
+in each element of PROPERTIES. PROPERTIES should be an alist of
+form '((property-name . format) ...) where format is a format
+valid to `format'. If format is not specified, it defaults to
+%s."
   (let* ((location-list (car marker-or-path))
          (plist (cdr marker-or-path))
          props)
     (dolist (p properties)
-      (let* ((prop (intern-soft (concat ":" (symbol-name p))))
+      (let* ((prop (intern-soft (concat ":" (symbol-name (car p)))))
+             (str-format (or (cdr p) "%s"))
              (value (plist-get plist prop)))
         (when value
           (add-to-list 'props
-                       (format "%s:%s"
-                               p (cond ((eq prop :label) (char-to-string value))
-                                       (t value))
-                               value)))))
+                       (format (concat "%s:" str-format)
+                               (car p) value)))))
     (concat (mapconcat 'identity props "|")
             (when props "|")
             (mapconcat 'url-hexify-string location-list "|"))))
 
 (defun google-maps-marker-to-url-parameters (marker)
-  (google-maps-urlencode-properties marker '(size color label)))
+  (google-maps-urlencode-properties marker '((size . "%d")
+                                             (color)
+                                             (label . "%c"))))
 
 (defun google-maps-markers-to-url-parameters (markers)
   "From MARKERS, build parameters for a Google Static Maps URL.
@@ -119,7 +123,9 @@ VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
              "|"))
 
 (defun google-maps-path-to-url-parameters (path)
-  (google-maps-urlencode-properties path '(weight color fillcolor)))
+  (google-maps-urlencode-properties path '((weight . "%d")
+                                           (color)
+                                           (fillcolor))))
 
 (defun google-maps-paths-to-url-parameters (paths)
   "From PATH, build parameters for a Google Static Maps URL.
