@@ -81,6 +81,43 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-params)
 
+(defun mapconcat-if-not-nil (function sequence separator)
+  "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings.
+This only concat result if result is not nil. In between each
+pair of results, stick in SEPARATOR.  Thus, " " as SEPARATOR
+results in spaces between the values returned by FUNCTION.
+SEQUENCE may be a list, a vector, a bool-vector, or a string."
+  (mapconcat
+   'identity
+   (remove-if 'null
+              (mapcar
+               function
+               sequence))
+   separator))
+
+(defun google-maps-symbol-to-property (symbol)
+  "Transform SYMBOL to :SYMBOL."
+  (intern-soft (concat ":" (symbol-name symbol))))
+
+(defun google-maps-urlencode-plist (plist properties)
+  "Encode PLIST for a URL using PROPERTIES.
+PROPERTIES should have form '((property-name . format))."
+  (mapconcat-if-not-nil
+   (lambda (entry)
+     (let* ((property (car entry))
+            (propsym (google-maps-symbol-to-property property))
+            (value (plist-get plist propsym))
+            (value-format (or (cdr entry) 'identity))
+            ;; If value-format is list or function, eval
+            (value (cond ((functionp value-format) (funcall
+                                                    value-format
+                                                    value))
+                         (t (eval value-format)))))
+       (when value
+         (format "%s=%s" property value))))
+   properties
+   "&"))
+
 (defun google-maps-urlencode-properties (marker-or-path properties)
   "Build a | separated url fragment from MARKER-OR-PATH, adding
 in each element of PROPERTIES. PROPERTIES should be an alist of
@@ -91,7 +128,7 @@ valid to `format'. If format is not specified, it defaults to
          (plist (cdr marker-or-path))
          props)
     (dolist (p properties)
-      (let* ((prop (intern-soft (concat ":" (symbol-name (car p)))))
+      (let* ((prop (google-maps-symbol-to-property (car p)))
              (str-format (or (cdr p) "%s"))
              (value (plist-get plist prop)))
         (when value
@@ -166,41 +203,31 @@ PATHS should have the form
 
 (defun google-maps-build-url (plist)
   "Build a URL to request a static Google Map."
-  (let ((center (plist-get plist :center))
-        (zoom (plist-get plist :zoom))
-        (width (plist-get plist :width))
-        (height (plist-get plist :height))
-        (sensor (plist-get plist :sensor))
-        ;; Optional
-        (format (plist-get plist :format))
-        (maptype (plist-get plist :maptype))
-        (mobile (plist-get plist :mobile))
-        (language (plist-get plist :language))
-        (markers (plist-get plist :markers))
-        (paths (plist-get plist :paths))
-        (visible (plist-get plist :visible)))
-    (concat
-     google-maps-uri
-     (format
-      "?center=%s&size=%dx%d&sensor=%s"
-      (url-hexify-string center)
-      width
-      height
-      (if sensor "true" "false"))
-     (if zoom (format "&zoom=%d" zoom) "")
-     (if format (concat "&format=" (symbol-name format)) "")
-     (if maptype (concat "&maptype=" (symbol-name maptype)) "")
-     (if mobile "&mobile=true" "")
-     (if language (concat "&language=" language) "")
-     (if markers
-         (concat "&markers=" (google-maps-markers-to-url-parameters markers))
-       "")
+  (concat
+   google-maps-uri "?"
+   (google-maps-urlencode-plist
+    plist
+    `((format)
+      (center . url-hexify-string)
+      (size . ,(format "%dx%d"
+                       (plist-get plist :width)
+                       (plist-get plist :height)))
+      (maptype)
+      (mobile . ,(lambda (v)
+                  (if v "true" nil)))
+      ;; Sensor is MANDATORY
+      (sensor . ,(lambda (v)
+                  (if v "true" "false")))
+      (zoom . ,(lambda (zoom)
+                (when zoom number-to-string (zoom))))
+      (format)
+      (language)
+      (markers . ,(google-maps-markers-to-url-parameters (plist-get plist :markers)))
+      (visible . ,(google-maps-visible-to-url-parameters (plist-get plist :visible)))))
+   (let ((paths (plist-get plist :paths)))
      (if paths
          (concat "&path=" (google-maps-paths-to-url-parameters paths))
-       "")
-     (if visible
-         (concat "&visible=" (google-maps-visible-to-url-parameters visible))
-       ""))))
+     ""))))
 
 (defun google-maps-skip-http-headers (buffer)
   "Remove HTTP headers from BUFFER, and return it.
