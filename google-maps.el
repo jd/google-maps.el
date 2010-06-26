@@ -99,50 +99,43 @@ SEQUENCE may be a list, a vector, a bool-vector, or a string."
   "Transform SYMBOL to :SYMBOL."
   (intern-soft (concat ":" (symbol-name symbol))))
 
-(defun google-maps-urlencode-plist (plist properties)
+(defun google-maps-urlencode-plist (plist properties &optional eqs separator)
   "Encode PLIST for a URL using PROPERTIES.
 PROPERTIES should have form '((property-name . format))."
-  (mapconcat-if-not-nil
-   (lambda (entry)
-     (let* ((property (car entry))
-            (propsym (google-maps-symbol-to-property property))
-            (value (plist-get plist propsym))
-            (value-format (or (cdr entry) 'identity))
-            ;; If value-format is list or function, eval
-            (value (cond ((functionp value-format) (funcall
-                                                    value-format
-                                                    value))
-                         (t (eval value-format)))))
-       (when value
-         (format "%s=%s" property value))))
-   properties
-   "&"))
-
-(defun google-maps-urlencode-properties (marker-or-path properties)
-  "Build a | separated url fragment from MARKER-OR-PATH, adding
-in each element of PROPERTIES. PROPERTIES should be an alist of
-form '((property-name . format) ...) where format is a format
-valid to `format'. If format is not specified, it defaults to
-%s."
-  (let* ((location-list (car marker-or-path))
-         (plist (cdr marker-or-path))
-         props)
-    (dolist (p properties)
-      (let* ((prop (google-maps-symbol-to-property (car p)))
-             (str-format (or (cdr p) "%s"))
-             (value (plist-get plist prop)))
-        (when value
-          (add-to-list 'props
-                       (format (concat "%s:" str-format)
-                               (car p) value)))))
-    (concat (mapconcat 'identity props "|")
-            (when props "|")
-            (mapconcat 'url-hexify-string location-list "|"))))
+  (let ((eqs (or eqs "="))
+        (separator (or separator "&")))
+    (mapconcat-if-not-nil
+     (lambda (entry)
+       (let* ((property (car entry))
+              (propsym (google-maps-symbol-to-property property))
+              (value (plist-get plist propsym))
+              (value-format (or (cdr entry) 'identity))
+              ;; If value-format is list or function, eval
+              (value (cond ((functionp value-format) (funcall
+                                                      value-format
+                                                      value))
+                           (t (eval value-format)))))
+         (when value
+           (format "%s%s%s" property eqs value))))
+     properties
+     separator)))
 
 (defun google-maps-marker-to-url-parameters (marker)
-  (google-maps-urlencode-properties marker '((size . "%d")
-                                             (color)
-                                             (label . "%c"))))
+  (let ((prop (google-maps-urlencode-plist
+               (cdr marker)
+               '((size . (lambda (size)
+                           (when size (number-to-string size))))
+                 (color)
+                 (label . (lambda (label)
+                            (when label (char-to-string label)))))
+               ":"
+               "|")))
+    (concat
+     (when prop (concat prop "|"))
+     (mapconcat
+      'url-hexify-string
+      (car marker)
+      "|"))))
 
 (defun google-maps-markers-to-url-parameters (markers)
   "From MARKERS, build parameters for a Google Static Maps URL.
@@ -160,9 +153,21 @@ VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
              "|"))
 
 (defun google-maps-path-to-url-parameters (path)
-  (google-maps-urlencode-properties path '((weight . "%d")
-                                           (color)
-                                           (fillcolor))))
+  (let ((prop (google-maps-urlencode-plist
+               (cdr path)
+               '((weight . (lambda (weight)
+                             (when weight
+                               (number-to-string weight))))
+                 (color)
+                 (fillcolor))
+               ":"
+               "|")))
+    (concat
+     (when prop (concat prop "|"))
+     (mapconcat
+      'url-hexify-string
+      (car path)
+      "|"))))
 
 (defun google-maps-paths-to-url-parameters (paths)
   "From PATH, build parameters for a Google Static Maps URL.
