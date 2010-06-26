@@ -239,7 +239,7 @@ image."
     (google-maps-mode)
     (let* ((inhibit-read-only t)
            (plist (google-maps-build-plist plist))
-           (url (google-maps-build-url plist))
+           (url (google-maps-build-url plist)))
       (setq google-maps-params plist)
       (delete-region (point-min) (point-max))
       (google-maps-insert-image-at-point
