@@ -74,8 +74,6 @@
 (defconst google-maps-maptypes '("roadmap" "satellite" "hybrid" "terrain")
   "Available map types.")
 
-(defvar google-maps-mode-map (make-sparse-keymap))
-
 (defvar google-maps-mode-hook nil
   "Hook run by `google-maps-mode'.")
 
