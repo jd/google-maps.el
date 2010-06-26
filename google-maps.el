@@ -93,11 +93,7 @@ in each element of PROPERTIES."
         (when value
           (add-to-list 'props
                        (format "%s:%s"
-                               p (cond ((symbolp value)
-                                        (symbol-name value))
-                                       ;; Special case for `label'
-                                       ('(eq prop :label)
-                                        (char-to-string value))
+                               p (cond ((eq prop :label) (char-to-string value))
                                        (t value))
                                value)))))
     (concat (mapconcat 'identity props "|")
