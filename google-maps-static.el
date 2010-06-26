@@ -1,4 +1,4 @@
-;;; google-maps.el --- Access Google Maps from Emacs
+;;; google-maps-static.el --- Access Google Maps Static from Emacs
 
 ;; Copyright (C) 2010 Free Software Foundation, Inc.
 
@@ -23,7 +23,7 @@
 ;;; Commentary:
 ;; All arguments are optional. Here is a full call example:
 ;;
-;; (google-maps-show
+;; (google-maps-static-show
 ;;  :center "Cimetière du Montparnasse"
 ;;  :maptype 'hybrid
 ;;  ;; :zoom 5
@@ -45,41 +45,41 @@
 (require 'url-util)
 (require 'url-http)
 
-(defgroup google-maps nil
+(defgroup google-maps-static nil
   "Google Maps."
   :group 'comm)
 
-(defcustom google-maps-buffer-name "*Google Maps*"
+(defcustom google-maps-static-buffer-name "*Google Maps*"
   "Name of the Google Maps buffer."
-  :group 'google-maps)
+  :group 'google-maps-static)
 
-(defcustom google-maps-default-sensor nil
+(defcustom google-maps-static-default-sensor nil
   "Default sensor value for map request."
-  :group 'google-maps)
+  :group 'google-maps-static)
 
-(defcustom google-maps-default-zoom 5
-  "Default zoom level when calling `google-maps-zoom' with no argument."
-  :group 'google-maps)
+(defcustom google-maps-static-default-zoom 5
+  "Default zoom level when calling `google-maps-static-zoom' with no argument."
+  :group 'google-maps-static)
 
-(defconst google-maps-uri
+(defconst google-maps-static-uri
   "http://maps.google.com/maps/api/staticmap"
   "Google Maps API server.")
 
-(defconst google-maps-minimum-zoom 0
+(defconst google-maps-static-minimum-zoom 0
   "Minimum zoom level.")
 
-(defconst google-maps-maximum-zoom 21
+(defconst google-maps-static-maximum-zoom 21
   "Minimum zoom level.")
 
-(defconst google-maps-maptypes '("roadmap" "satellite" "hybrid" "terrain")
+(defconst google-maps-static-maptypes '("roadmap" "satellite" "hybrid" "terrain")
   "Available map types.")
 
-(defvar google-maps-mode-hook nil
-  "Hook run by `google-maps-mode'.")
+(defvar google-maps-static-mode-hook nil
+  "Hook run by `google-maps-static-mode'.")
 
-(defvar google-maps-params nil
+(defvar google-maps-static-params nil
   "Current parameters of the map.")
-(make-variable-buffer-local 'google-maps-params)
+(make-variable-buffer-local 'google-maps-static-params)
 
 (defun mapconcat-if-not-nil (function sequence separator)
   "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings.
@@ -95,11 +95,11 @@ SEQUENCE may be a list, a vector, a bool-vector, or a string."
                sequence))
    separator))
 
-(defun google-maps-symbol-to-property (symbol)
+(defun google-maps-static-symbol-to-property (symbol)
   "Transform SYMBOL to :SYMBOL."
   (intern-soft (concat ":" (symbol-name symbol))))
 
-(defun google-maps-urlencode-plist (plist properties &optional eqs separator)
+(defun google-maps-static-urlencode-plist (plist properties &optional eqs separator)
   "Encode PLIST for a URL using PROPERTIES.
 PROPERTIES should have form '((property-name . format))."
   (let ((eqs (or eqs "="))
@@ -107,7 +107,7 @@ PROPERTIES should have form '((property-name . format))."
     (mapconcat-if-not-nil
      (lambda (entry)
        (let* ((property (car entry))
-              (propsym (google-maps-symbol-to-property property))
+              (propsym (google-maps-static-symbol-to-property property))
               (value (plist-get plist propsym))
               (value-format (or (cdr entry) 'identity))
               ;; If value-format is list or function, eval
@@ -120,8 +120,8 @@ PROPERTIES should have form '((property-name . format))."
      properties
      separator)))
 
-(defun google-maps-marker-to-url-parameters (marker)
-  (let ((prop (google-maps-urlencode-plist
+(defun google-maps-static-marker-to-url-parameters (marker)
+  (let ((prop (google-maps-static-urlencode-plist
                (cdr marker)
                '((size . (lambda (size)
                            (when size (number-to-string size))))
@@ -137,23 +137,23 @@ PROPERTIES should have form '((property-name . format))."
       (car marker)
       "|"))))
 
-(defun google-maps-markers-to-url-parameters (markers)
+(defun google-maps-static-markers-to-url-parameters (markers)
   "From MARKERS, build parameters for a Google Static Maps URL.
 MARKERS should have the form
 '(((\"loc1\" \"loc2\") . (:size tiny :color \"blue\" :label ?X)))"
-  (mapconcat 'google-maps-marker-to-url-parameters
+  (mapconcat 'google-maps-static-marker-to-url-parameters
              markers
              "&markers="))
 
-(defun google-maps-visible-to-url-parameters (visible)
+(defun google-maps-static-visible-to-url-parameters (visible)
   "From VISIBLE, build parameters for a Google Static Maps URL.
 VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
   (mapconcat 'url-hexify-string
              visible
              "|"))
 
-(defun google-maps-path-to-url-parameters (path)
-  (let ((prop (google-maps-urlencode-plist
+(defun google-maps-static-path-to-url-parameters (path)
+  (let ((prop (google-maps-static-urlencode-plist
                (cdr path)
                '((weight . (lambda (weight)
                              (when weight
@@ -169,27 +169,27 @@ VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
       (car path)
       "|"))))
 
-(defun google-maps-paths-to-url-parameters (paths)
+(defun google-maps-static-paths-to-url-parameters (paths)
   "From PATH, build parameters for a Google Static Maps URL.
 PATHS should have the form
 '(((\"loc1\" \"loc2\") . (:weight 5 :color \"red\" :fillcolor \"black\")))"
-  (mapconcat 'google-maps-path-to-url-parameters
+  (mapconcat 'google-maps-static-path-to-url-parameters
              paths
              "&path="))
 
-(defun google-maps-set-size (plist)
+(defun google-maps-static-set-size (plist)
   "adapt size to current window settings"
   (let ((edges (window-inside-pixel-edges)))
     (plist-put plist :width (- (nth 2 edges) (nth 0 edges) ))
     (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))
     plist))
 
-(defun google-maps-refresh ()
+(defun google-maps-static-refresh ()
   "Redisplay the map."
   (interactive)
-  (apply 'google-maps-show google-maps-params))
+  (apply 'google-maps-static-show google-maps-static-params))
 
-(defun google-maps-build-plist (plist)
+(defun google-maps-static-build-plist (plist)
   "Build a property list based on PLIST."
   ;; Make all markers upper case
   (let ((markers (plist-get plist :markers)))
@@ -202,15 +202,15 @@ PATHS should have the form
                       marker))
                   markers))))
   (unless (plist-member plist :sensor)
-    (plist-put plist :sensor google-maps-default-sensor))
-  (google-maps-set-size plist)
+    (plist-put plist :sensor google-maps-static-default-sensor))
+  (google-maps-static-set-size plist)
   plist)
 
-(defun google-maps-build-url (plist)
+(defun google-maps-static-build-url (plist)
   "Build a URL to request a static Google Map."
   (concat
-   google-maps-uri "?"
-   (google-maps-urlencode-plist
+   google-maps-static-uri "?"
+   (google-maps-static-urlencode-plist
     plist
     `((format)
       (center . url-hexify-string)
@@ -227,14 +227,14 @@ PATHS should have the form
                 (when zoom number-to-string (zoom))))
       (format)
       (language)
-      (markers . ,(google-maps-markers-to-url-parameters (plist-get plist :markers)))
-      (visible . ,(google-maps-visible-to-url-parameters (plist-get plist :visible)))))
+      (markers . ,(google-maps-static-markers-to-url-parameters (plist-get plist :markers)))
+      (visible . ,(google-maps-static-visible-to-url-parameters (plist-get plist :visible)))))
    (let ((paths (plist-get plist :paths)))
      (if paths
-         (concat "&path=" (google-maps-paths-to-url-parameters paths))
+         (concat "&path=" (google-maps-static-paths-to-url-parameters paths))
      ""))))
 
-(defun google-maps-skip-http-headers (buffer)
+(defun google-maps-static-skip-http-headers (buffer)
   "Remove HTTP headers from BUFFER, and return it.
 Assumes headers are indeed present!"
   (with-current-buffer buffer
@@ -244,17 +244,17 @@ Assumes headers are indeed present!"
     (delete-region (point-min) (point))
     buffer))
 
-(defun google-maps-retrieve-data (url)
+(defun google-maps-static-retrieve-data (url)
   "Retrieve image and return its data as string, using URL to the
 image."
-  (let* ((image-buffer (google-maps-skip-http-headers
+  (let* ((image-buffer (google-maps-static-skip-http-headers
                         (url-retrieve-synchronously url)))
          (data (with-current-buffer image-buffer
                  (buffer-string))))
     (kill-buffer image-buffer)
     data))
 
-(defun google-maps-insert-image-at-point (start image format)
+(defun google-maps-static-insert-image-at-point (start image format)
   "Insert an IMAGE with FORMAT at point START."
   (goto-char start)
   (insert "Map")
@@ -265,7 +265,7 @@ image."
      read-only t
      rear-nonsticky (display read-only))))
 
-(defun google-maps-show (&rest plist)
+(defun google-maps-static-show (&rest plist)
   "Open a new buffer with a Google Map.
 
 PLIST can contains this properties:
@@ -295,189 +295,189 @@ PLIST can contains this properties:
            OPTIONS is not mandatory. If set, it should be a list
            with any number of options as above:
            (:fillcolor \"blue\" :weight 5 :color \"yellow\")."
-  (let ((buffer (get-buffer-create google-maps-buffer-name)))
+  (let ((buffer (get-buffer-create google-maps-static-buffer-name)))
     (unless (eq (current-buffer) buffer)
       (switch-to-buffer-other-window buffer))
-    (google-maps-mode)
+    (google-maps-static-mode)
     (let* ((inhibit-read-only t)
-           (plist (google-maps-build-plist plist))
-           (url (google-maps-build-url plist)))
-      (setq google-maps-params plist)
+           (plist (google-maps-static-build-plist plist))
+           (url (google-maps-static-build-url plist)))
+      (setq google-maps-static-params plist)
       (delete-region (point-min) (point-max))
-      (google-maps-insert-image-at-point
+      (google-maps-static-insert-image-at-point
        (point-min)
-       (google-maps-retrieve-data url)
+       (google-maps-static-retrieve-data url)
        (plist-get plist :format)))))
 
-(defvar google-maps-mode-map
+(defvar google-maps-static-mode-map
   (let ((map (make-sparse-keymap)))
-    (define-key map (kbd "+") 'google-maps-zoom-in)
-    (define-key map (kbd ">") 'google-maps-zoom-in)
-    (define-key map (kbd ".") 'google-maps-zoom-in)
-    (define-key map (kbd "-") 'google-maps-zoom-out)
-    (define-key map (kbd "<") 'google-maps-zoom-out)
-    (define-key map (kbd ",") 'google-maps-zoom-out)
-    (define-key map (kbd "z") 'google-maps-zoom)
-    (define-key map (kbd "q") 'google-maps-quit)
-    (define-key map (kbd "w") 'google-maps-copy-url)
-    (define-key map (kbd "m") 'google-maps-manage-marker)
-    (define-key map (kbd "v") 'google-maps-manage-visible)
-    (define-key map (kbd "c") 'google-maps-center)
-    (define-key map (kbd "t") 'google-maps-set-maptype)
-    (define-key map (kbd "g") 'google-maps-refresh)
-    (define-key map [mouse-4] 'google-maps-zoom-mouse-in)
-    (define-key map [mouse-5] 'google-maps-zoom-mouse-out)
+    (define-key map (kbd "+") 'google-maps-static-zoom-in)
+    (define-key map (kbd ">") 'google-maps-static-zoom-in)
+    (define-key map (kbd ".") 'google-maps-static-zoom-in)
+    (define-key map (kbd "-") 'google-maps-static-zoom-out)
+    (define-key map (kbd "<") 'google-maps-static-zoom-out)
+    (define-key map (kbd ",") 'google-maps-static-zoom-out)
+    (define-key map (kbd "z") 'google-maps-static-zoom)
+    (define-key map (kbd "q") 'google-maps-static-quit)
+    (define-key map (kbd "w") 'google-maps-static-copy-url)
+    (define-key map (kbd "m") 'google-maps-static-manage-marker)
+    (define-key map (kbd "v") 'google-maps-static-manage-visible)
+    (define-key map (kbd "c") 'google-maps-static-center)
+    (define-key map (kbd "t") 'google-maps-static-set-maptype)
+    (define-key map (kbd "g") 'google-maps-static-refresh)
+    (define-key map [mouse-4] 'google-maps-static-zoom-mouse-in)
+    (define-key map [mouse-5] 'google-maps-static-zoom-mouse-out)
     map)
-  "Keymap for `google-maps-mode'.")
+  "Keymap for `google-maps-static-mode'.")
 
 ;;;###autoload
-(define-derived-mode google-maps-mode fundamental-mode "Google Maps"
+(define-derived-mode google-maps-static-mode fundamental-mode "Google Maps"
   "A major mode for Google Maps service"
   :group 'comm
   (setq cursor-type nil)
   (setq buffer-read-only t))
 
-(defun google-maps-zoom (level)
+(defun google-maps-static-zoom (level)
   "Zoom a Google map."
   (interactive "P")
-  (let ((plist google-maps-params)
-        (level (or level google-maps-default-zoom)))
+  (let ((plist google-maps-static-params)
+        (level (or level google-maps-static-default-zoom)))
     (plist-put plist
                :zoom
-               (max (min level google-maps-maximum-zoom) google-maps-minimum-zoom))
-    (apply 'google-maps-show plist)))
+               (max (min level google-maps-static-maximum-zoom) google-maps-static-minimum-zoom))
+    (apply 'google-maps-static-show plist)))
 
-(defun google-maps-zoom-in ()
+(defun google-maps-static-zoom-in ()
   "Zoom a Google map in."
   (interactive)
-  (unless (plist-member google-maps-params :zoom)
+  (unless (plist-member google-maps-static-params :zoom)
     (error "Current zoom level is unknown, cannot zoom in."))
-  (google-maps-zoom (1+ (plist-get google-maps-params :zoom))))
+  (google-maps-static-zoom (1+ (plist-get google-maps-static-params :zoom))))
 
-(defun google-maps-zoom-out ()
+(defun google-maps-static-zoom-out ()
   "Zoom a Google map out."
   (interactive)
-  (unless (plist-member google-maps-params :zoom)
+  (unless (plist-member google-maps-static-params :zoom)
     (error "Current zoom level is unknown, cannot zoom out."))
-  (google-maps-zoom (1- (plist-get google-maps-params :zoom))))
+  (google-maps-static-zoom (1- (plist-get google-maps-static-params :zoom))))
 
-(defun google-maps-quit ()
+(defun google-maps-static-quit ()
   "Kill Google maps buffer."
   (interactive)
   (kill-buffer))
 
-(defun google-maps-copy-url ()
+(defun google-maps-static-copy-url ()
   "Kill Google maps buffer."
   (interactive)
-  (kill-new (google-maps-build-url google-maps-params)))
+  (kill-new (google-maps-static-build-url google-maps-static-params)))
 
-(defun google-maps-add-visible (location)
+(defun google-maps-static-add-visible (location)
   "Make LOCATION visible on the map."
   (interactive
    (list
     (read-string "Location to set visible: ")))
-  (let* ((plist google-maps-params)
+  (let* ((plist google-maps-static-params)
          (visible (plist-get plist :visible)))
     (plist-put plist :visible (add-to-list 'visible location))
-    (apply 'google-maps-show plist)))
+    (apply 'google-maps-static-show plist)))
 
-(defun google-maps-remove-visible (location)
+(defun google-maps-static-remove-visible (location)
   "Remove a visible LOCATION on the map."
   (interactive
-   (let* ((plist google-maps-params)
+   (let* ((plist google-maps-static-params)
           (visible (plist-get plist :visible)))
      (list
       (completing-read "Location to unset visible: " visible nil t))))
-  (let* ((plist google-maps-params)
+  (let* ((plist google-maps-static-params)
          (visible (plist-get plist :visible)))
     (plist-put plist :visible
                (remove-if `(lambda (l) (string= l ,location)) visible))
-    (apply 'google-maps-show plist)))
+    (apply 'google-maps-static-show plist)))
 
-(defun google-maps-manage-visible (remove)
+(defun google-maps-static-manage-visible (remove)
   "Add or remove a visible location. If REMOVE is set, remove it."
   (interactive "P")
   (if remove
-      (call-interactively 'google-maps-remove-visible)
-    (call-interactively 'google-maps-add-visible)))
+      (call-interactively 'google-maps-static-remove-visible)
+    (call-interactively 'google-maps-static-add-visible)))
 
-(defun google-maps-add-marker (location label &optional size color)
+(defun google-maps-static-add-marker (location label &optional size color)
   "Add a marker on LOCATION on the map with LABEL. You can
 specify SIZE and COLOR of the LABEL."
   (interactive
    (list
     (read-string "Location to mark: ")
     (read-char "Type a character to use as mark for location.")))
-  (let* ((plist google-maps-params)
+  (let* ((plist google-maps-static-params)
          (markers (plist-get plist :markers)))
     (add-to-list 'markers `((,location) . (:label ,label :size ,size :color ,color)))
     (plist-put plist :markers markers)
-    (apply 'google-maps-show plist)))
+    (apply 'google-maps-static-show plist)))
 
-(defun google-maps-remove-marker (label)
+(defun google-maps-static-remove-marker (label)
   "Remove a marker from the map."
   (interactive
    (list
     (read-char "Type the mark character to remove from the map.")))
   (let ((label (upcase label)))
-    (let* ((plist google-maps-params)
+    (let* ((plist google-maps-static-params)
            (markers (plist-get plist :markers)))
       (plist-put plist :markers
                  (remove-if
                   (lambda (marker)
                     (eq (plist-get (cdr marker) :label) label))
                   markers))
-      (apply 'google-maps-show plist))))
+      (apply 'google-maps-static-show plist))))
 
-(defun google-maps-manage-marker (times)
+(defun google-maps-static-manage-marker (times)
   "Remove or add markers on the map.
 If TIMES is positive, add this number of marker.
 If TIMES is negative, then remove this number of markers."
   (interactive "p")
   (if (> times 0)
       (dotimes (x times)
-        (call-interactively 'google-maps-add-marker))
+        (call-interactively 'google-maps-static-add-marker))
     (dotimes (x (abs times))
-      (call-interactively 'google-maps-remove-marker))))
+      (call-interactively 'google-maps-static-remove-marker))))
 
-(defun google-maps-center (location)
+(defun google-maps-static-center (location)
   "Center the map on a LOCATION. If LOCATION is nil or an empty
 string, it will remove centering."
   (interactive
    (list
     (read-string "Location to center the map on: ")))
-  (let ((plist google-maps-params))
+  (let ((plist google-maps-static-params))
     (plist-put plist :center location)
-    (apply 'google-maps-show plist)))
+    (apply 'google-maps-static-show plist)))
 
-(defun google-maps-event-to-buffer (event)
+(defun google-maps-static-event-to-buffer (event)
   (window-buffer (posn-window (event-start event))))
 
-(defun google-maps-zoom-mouse-in (event)
+(defun google-maps-static-zoom-mouse-in (event)
   "Zoom with the mouse."
   (interactive (list last-input-event))
-    (with-current-buffer (google-maps-event-to-buffer event)
-      (funcall 'google-maps-zoom-in)))
+    (with-current-buffer (google-maps-static-event-to-buffer event)
+      (funcall 'google-maps-static-zoom-in)))
 
-(defun google-maps-zoom-mouse-out (event)
+(defun google-maps-static-zoom-mouse-out (event)
   "Zoom with the mouse."
   (interactive (list last-input-event))
-    (with-current-buffer (google-maps-event-to-buffer event)
-      (funcall 'google-maps-zoom-out)))
+    (with-current-buffer (google-maps-static-event-to-buffer event)
+      (funcall 'google-maps-static-zoom-out)))
 
-(defun google-maps-set-maptype (maptype)
+(defun google-maps-static-set-maptype (maptype)
   "Set map type to MAPTYPE."
   (interactive
    (list
     (intern
-     (completing-read "Map type: " google-maps-maptypes nil t))))
-  (let ((plist google-maps-params))
+     (completing-read "Map type: " google-maps-static-maptypes nil t))))
+  (let ((plist google-maps-static-params))
     (plist-put plist :maptype maptype)
-    (apply 'google-maps-show plist)))
+    (apply 'google-maps-static-show plist)))
 
-(defun google-maps (location)
+(defun google-maps-static (location)
   "Run Google Maps on LOCATION."
   (interactive (list (read-string "Location: ")))
-  (google-maps-show :center location))
+  (google-maps-static-show :center location))
 
-(provide 'google-maps)
+(provide 'google-maps-static)
