@@ -266,7 +266,35 @@ image."
      rear-nonsticky (display read-only))))
 
 (defun google-maps-show (&rest plist)
-  "XXX DOC."
+  "Open a new buffer with a Google Map.
+
+PLIST can contains this properties:
+
+ :center   Where to center the map.
+ :zoom     Zoom level on the map.
+ :sensor   Specifies whether the application requesting the static
+           map is using a sensor to determine the user's
+           location.
+ :mobile   Specifies whether the map will be displayed on a mobile
+           device.
+ :format   Defines the format of the resulting image.
+ :width    Image width.
+ :height   Image height.
+ :language Defines the language to use for display of labels on
+           map tiles.
+ :visible  A list of location that should stay visible on the map.
+ :markers  An alist of markers.
+           Format for a marker is
+           ((\"Location 1\" \"Location 2\" ... \"Location N\") . options)
+           OPTIONS is not mandatory. If set, it should be a list
+           with any number of options as above:
+           (:size 2 :color \"blue\" :label ?J).
+ :paths    An a list of path to draw.
+           Format for a path is
+           ((\"Location 1\" \"Location 2\" ... \"Location N \") . options)
+           OPTIONS is not mandatory. If set, it should be a list
+           with any number of options as above:
+           (:fillcolor \"blue\" :weight 5 :color \"yellow\")."
   (let ((buffer (get-buffer-create google-maps-buffer-name)))
     (unless (eq (current-buffer) buffer)
       (switch-to-buffer-other-window buffer))
