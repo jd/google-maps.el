@@ -244,7 +244,7 @@ Assumes headers are indeed present!"
     (delete-region (point-min) (point))
     buffer))
 
-(defun google-maps-retrieve-image (url)
+(defun google-maps-retrieve-data (url)
   "Retrieve image and return its data as string, using URL to the
 image."
   (let* ((image-buffer (google-maps-skip-http-headers
@@ -306,7 +306,7 @@ PLIST can contains this properties:
       (delete-region (point-min) (point-max))
       (google-maps-insert-image-at-point
        (point-min)
-       (google-maps-retrieve-image url)
+       (google-maps-retrieve-data url)
        (plist-get plist :format)))))
 
 (defvar google-maps-mode-map
