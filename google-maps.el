@@ -83,10 +83,6 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-params)
 
-(defvar google-maps-url nil
-  "Current parameters of the map.")
-(make-variable-buffer-local 'google-maps-url)
-
 (defun google-maps-urlencode-properties (marker-or-path properties)
   "Build a | separated url fragment from MARKER-OR-PATH, adding
 in each element of PROPERTIES."
@@ -243,14 +239,14 @@ image."
     (unless (eq (current-buffer) buffer)
       (switch-to-buffer-other-window buffer))
     (google-maps-mode)
-    (let ((inhibit-read-only t)
-          (plist (google-maps-build-plist plist)))
+    (let* ((inhibit-read-only t)
+           (plist (google-maps-build-plist plist))
+           (url (google-maps-build-url plist))
       (setq google-maps-params plist)
-      (setq google-maps-url (google-maps-build-url plist))
       (delete-region (point-min) (point-max))
       (google-maps-insert-image-at-point
        (point-min)
-       (google-maps-retrieve-image google-maps-url)
+       (google-maps-retrieve-image url)
        (plist-get plist :format)))))
 
 (defvar google-maps-mode-map
@@ -313,7 +309,7 @@ image."
 (defun google-maps-copy-url ()
   "Kill Google maps buffer."
   (interactive)
-  (kill-new google-maps-url))
+  (kill-new (google-maps-build-url google-maps-params)))
 
 (defun google-maps-add-visible (location)
   "Make LOCATION visible on the map."
