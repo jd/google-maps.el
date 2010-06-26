@@ -42,19 +42,16 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'google-maps)
 (require 'url-util)
 (require 'url-http)
 
 (defgroup google-maps-static nil
-  "Google Maps."
-  :group 'comm)
+  "Google Maps Static."
+  :group 'google-maps)
 
 (defcustom google-maps-static-buffer-name "*Google Maps*"
   "Name of the Google Maps buffer."
-  :group 'google-maps-static)
-
-(defcustom google-maps-static-default-sensor nil
-  "Default sensor value for map request."
   :group 'google-maps-static)
 
 (defcustom google-maps-static-default-zoom 5
@@ -84,7 +81,7 @@
 (defun mapconcat-if-not-nil (function sequence separator)
   "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings.
 This only concat result if result is not nil. In between each
-pair of results, stick in SEPARATOR.  Thus, " " as SEPARATOR
+pair of results, stick in SEPARATOR.  Thus, \" \" as SEPARATOR
 results in spaces between the values returned by FUNCTION.
 SEQUENCE may be a list, a vector, a bool-vector, or a string."
   (mapconcat
@@ -202,7 +199,7 @@ PATHS should have the form
                       marker))
                   markers))))
   (unless (plist-member plist :sensor)
-    (plist-put plist :sensor google-maps-static-default-sensor))
+    (plist-put plist :sensor google-maps-default-sensor))
   (google-maps-static-set-size plist)
   plist)
 
@@ -233,26 +230,6 @@ PATHS should have the form
      (if paths
          (concat "&path=" (google-maps-static-paths-to-url-parameters paths))
      ""))))
-
-(defun google-maps-static-skip-http-headers (buffer)
-  "Remove HTTP headers from BUFFER, and return it.
-Assumes headers are indeed present!"
-  (with-current-buffer buffer
-    (widen)
-    (goto-char (point-min))
-    (search-forward "\n\n")
-    (delete-region (point-min) (point))
-    buffer))
-
-(defun google-maps-static-retrieve-data (url)
-  "Retrieve image and return its data as string, using URL to the
-image."
-  (let* ((image-buffer (google-maps-static-skip-http-headers
-                        (url-retrieve-synchronously url)))
-         (data (with-current-buffer image-buffer
-                 (buffer-string))))
-    (kill-buffer image-buffer)
-    data))
 
 (defun google-maps-static-insert-image-at-point (start image format)
   "Insert an IMAGE with FORMAT at point START."
@@ -306,7 +283,7 @@ PLIST can contains this properties:
       (delete-region (point-min) (point-max))
       (google-maps-static-insert-image-at-point
        (point-min)
-       (google-maps-static-retrieve-data url)
+       (google-maps-retrieve-data url)
        (plist-get plist :format)))))
 
 (defvar google-maps-static-mode-map
