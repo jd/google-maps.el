@@ -78,15 +78,15 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-static-params)
 
-(defun mapconcat-if-not-nil (function sequence separator)
-  "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings.
-This only concat result if result is not nil. In between each
-pair of results, stick in SEPARATOR.  Thus, \" \" as SEPARATOR
-results in spaces between the values returned by FUNCTION.
-SEQUENCE may be a list, a vector, a bool-vector, or a string."
+(defun mapconcat-if-not (predicate function sequence separator)
+  "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings if they validate PREDICATE.
+In between each pair of results, stick in SEPARATOR.  Thus, \" \"
+as SEPARATOR results in spaces between the values returned by
+FUNCTION.  SEQUENCE may be a list, a vector, a bool-vector, or a
+string."
   (mapconcat
    'identity
-   (remove-if 'null
+   (remove-if predicate
               (mapcar
                function
                sequence))
@@ -101,7 +101,8 @@ SEQUENCE may be a list, a vector, a bool-vector, or a string."
 PROPERTIES should have form '((property-name . format))."
   (let ((eqs (or eqs "="))
         (separator (or separator "&")))
-    (mapconcat-if-not-nil
+    (mapconcat-if-not
+     'null
      (lambda (entry)
        (let* ((property (car entry))
               (propsym (google-maps-static-symbol-to-property property))
