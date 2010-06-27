@@ -174,8 +174,11 @@ PATHS should have the form
                  (mapcar
                   (lambda (marker)
                     (let ((props (cdr marker)))
-                      (plist-put props :label (upcase (plist-get props :label)))
-                      marker))
+                      (when props
+                        (let ((label (plist-get props :label)))
+                          (when label
+                            (plist-put props :label (upcase label))))))
+                      marker)
                   markers))))
   (google-maps-static-set-size
    (google-maps-build-plist plist)))
