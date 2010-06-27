@@ -199,10 +199,8 @@ PATHS should have the form
                       (plist-put props :label (upcase (plist-get props :label)))
                       marker))
                   markers))))
-  (unless (plist-member plist :sensor)
-    (plist-put plist :sensor google-maps-default-sensor))
-  (google-maps-static-set-size plist)
-  plist)
+  (google-maps-static-set-size
+   (google-maps-build-plist plist)))
 
 (defun google-maps-static-build-url (plist)
   "Build a URL to request a static Google Map."

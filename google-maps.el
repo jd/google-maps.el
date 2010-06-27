@@ -33,6 +33,12 @@
   "Default sensor value for map request."
   :group 'google-maps)
 
+(defun google-maps-build-plist (plist)
+  "Build a property list based on PLIST."
+  (unless (plist-member plist :sensor)
+    (plist-put plist :sensor google-maps-default-sensor))
+  plist)
+
 (defun google-maps-skip-http-headers (buffer)
   "Remove HTTP headers from BUFFER, and return it.
 Assumes headers are indeed present!"
