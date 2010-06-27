@@ -454,6 +454,6 @@ string, it will remove centering."
 (defun google-maps-static (location)
   "Run Google Maps on LOCATION."
   (interactive (list (read-string "Location: ")))
-  (google-maps-static-show :center location))
+  (google-maps-static-show :markers `((,location))))
 
 (provide 'google-maps-static)
