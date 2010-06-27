@@ -96,30 +96,8 @@ string."
   "Transform SYMBOL to :SYMBOL."
   (intern-soft (concat ":" (symbol-name symbol))))
 
-(defun google-maps-static-urlencode-plist (plist properties &optional eqs separator)
-  "Encode PLIST for a URL using PROPERTIES.
-PROPERTIES should have form '((property-name . format))."
-  (let ((eqs (or eqs "="))
-        (separator (or separator "&")))
-    (mapconcat-if-not
-     'null
-     (lambda (entry)
-       (let* ((property (car entry))
-              (propsym (google-maps-static-symbol-to-property property))
-              (value (plist-get plist propsym))
-              (value-format (or (cdr entry) 'identity))
-              ;; If value-format is list or function, eval
-              (value (cond ((functionp value-format) (funcall
-                                                      value-format
-                                                      value))
-                           (t (eval value-format)))))
-         (when value
-           (format "%s%s%s" property eqs value))))
-     properties
-     separator)))
-
 (defun google-maps-static-marker-to-url-parameters (marker)
-  (let ((prop (google-maps-static-urlencode-plist
+  (let ((prop (google-maps-urlencode-plist
                (cdr marker)
                '((size . (lambda (size)
                            (when size (number-to-string size))))
@@ -151,7 +129,7 @@ VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
              "|"))
 
 (defun google-maps-static-path-to-url-parameters (path)
-  (let ((prop (google-maps-static-urlencode-plist
+  (let ((prop (google-maps-urlencode-plist
                (cdr path)
                '((weight . (lambda (weight)
                              (when weight
@@ -206,7 +184,7 @@ PATHS should have the form
   "Build a URL to request a static Google Map."
   (concat
    google-maps-static-uri "?"
-   (google-maps-static-urlencode-plist
+   (google-maps-urlencode-plist
     plist
     `((format)
       (center . url-hexify-string)
