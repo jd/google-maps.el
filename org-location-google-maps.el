@@ -1,4 +1,4 @@
-;;; google-maps-static.el --- Access Google Maps Static from Emacs
+;;; org-location-google-maps.el --- Show Google Maps' map for an Org entry location
 
 ;; Copyright (C) 2010 Free Software Foundation, Inc.
 
