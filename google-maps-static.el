@@ -78,20 +78,6 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-static-params)
 
-(defun mapconcat-if-not (predicate function sequence separator)
-  "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings if they validate PREDICATE.
-In between each pair of results, stick in SEPARATOR.  Thus, \" \"
-as SEPARATOR results in spaces between the values returned by
-FUNCTION.  SEQUENCE may be a list, a vector, a bool-vector, or a
-string."
-  (mapconcat
-   'identity
-   (remove-if predicate
-              (mapcar
-               function
-               sequence))
-   separator))
-
 (defun google-maps-static-symbol-to-property (symbol)
   "Transform SYMBOL to :SYMBOL."
   (intern-soft (concat ":" (symbol-name symbol))))
