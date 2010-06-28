@@ -43,7 +43,7 @@ and do not ask the user for a more precise location."
       (read-string "Location: "
                    (replace-regexp-in-string
                     "\n" " "
-                    (thing-at-point 'sentence))))))
+                    (or (thing-at-point 'sentence) ""))))))
   (let ((location (if no-geocoding
                       location
                     (google-maps-geocode-location location))))
