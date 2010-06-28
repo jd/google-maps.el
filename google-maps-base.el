@@ -62,6 +62,7 @@ string."
   (let* ((buffer (url-retrieve-synchronously url))
          data)
     (with-current-buffer buffer
+      (goto-char (point-min))
       (search-forward "\n\n")
       (when (string-match-p
              "^Content-Type: .+; charset=UTF-8$"
