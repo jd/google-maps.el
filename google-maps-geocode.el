@@ -109,4 +109,13 @@ If there is several results, the user is asked to pick one via
                       (google-maps-geocode-results->one-result
                        (google-maps-geocode-request->results req)))))))
 
+;;;###autoload
+(defun google-maps-geocode-replace-region (beg end)
+  "Geocode region and replace it with a more accurate result."
+  (interactive "r")
+  (let ((location (google-maps-geocode-location
+                   (buffer-substring beg end))))
+    (delete-region beg end)
+    (insert location)))
+
 (provide 'google-maps-geocode)
