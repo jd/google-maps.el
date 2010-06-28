@@ -44,7 +44,6 @@
 
 (require 'google-maps-base)
 (require 'url-util)
-(require 'url-http)
 
 (defgroup google-maps-static nil
   "Google Maps Static."
