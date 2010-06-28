@@ -182,7 +182,7 @@ PATHS should have the form
       (sensor . ,(lambda (v)
                   (if v "true" "false")))
       (zoom . ,(lambda (zoom)
-                (when zoom number-to-string (zoom))))
+                 (when zoom (number-to-string zoom))))
       (format)
       (language)
       (markers . ,(google-maps-static-markers-to-url-parameters (plist-get plist :markers)))
