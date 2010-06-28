@@ -42,7 +42,7 @@
 (eval-when-compile
   (require 'cl))
 
-(require 'google-maps-base)
+(require 'google-maps-geocode)
 (require 'url-util)
 
 (defgroup google-maps-static nil
@@ -316,7 +316,8 @@ PLIST can contains this properties:
     (read-string "Location to set visible: ")))
   (let* ((plist google-maps-static-params)
          (visible (plist-get plist :visible)))
-    (plist-put plist :visible (add-to-list 'visible location))
+    (plist-put plist :visible (add-to-list 'visible
+                                           (google-maps-geocode-location location)))
     (apply 'google-maps-static-show plist)))
 
 (defun google-maps-static-remove-visible (location)
@@ -348,7 +349,8 @@ specify SIZE and COLOR of the LABEL."
     (read-char "Type a character to use as mark for location.")))
   (let* ((plist google-maps-static-params)
          (markers (plist-get plist :markers)))
-    (add-to-list 'markers `((,location) . (:label ,label :size ,size :color ,color)))
+    (add-to-list 'markers `((,(google-maps-geocode-location location))
+                             . (:label ,label :size ,size :color ,color)))
     (plist-put plist :markers markers)
     (apply 'google-maps-static-show plist)))
 
@@ -385,7 +387,7 @@ string, it will remove centering."
    (list
     (read-string "Location to center the map on: ")))
   (let ((plist google-maps-static-params))
-    (plist-put plist :center location)
+    (plist-put plist :center (google-maps-geocode-location location))
     (apply 'google-maps-static-show plist)))
 
 (defun google-maps-static-event-to-buffer (event)
