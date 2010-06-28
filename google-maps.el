@@ -34,15 +34,9 @@
 If NO-GEOCODING is t, then does not try to geocode the address
 and do not ask the user for a more precise location."
   (interactive (list (read-string "Location: ")))
-  (unless no-geocoding
-    (let* ((req (google-maps-geocode-request :address location))
-           (status (google-maps-geocode-request->status req)))
-      (unless (eq status 'ok)
-        (error (format "Unable to geocode %s: %s" location status)))
-      (setq location
-            (cdr (assoc 'formatted_address
-                        (google-maps-geocode-results->one-result
-                         (google-maps-geocode-request->results req)))))))
-    (google-maps-static-show :markers `(((,location)))))
+  (let ((location (if no-geocoding
+                      location
+                    (google-maps-geocode-location location))))
+    (google-maps-static-show :markers `(((,location))))))
 
 (provide 'google-maps)

@@ -99,4 +99,14 @@ If there is several results, the user is asked to pick one via
     (1 (elt results 0))
     (t (google-maps-geocode-results->one-result-picked-by-user results))))
 
+(defun google-maps-geocode-location (&rest params)
+  (let* ((req (google-maps-geocode-request :address location))
+         (status (google-maps-geocode-request->status req)))
+    (unless (eq status 'ok)
+      (error (format "Unable to geocode %s: %s" location status)))
+    (setq location
+          (cdr (assoc 'formatted_address
+                      (google-maps-geocode-results->one-result
+                       (google-maps-geocode-request->results req)))))))
+
 (provide 'google-maps-geocode)
