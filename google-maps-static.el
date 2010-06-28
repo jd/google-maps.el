@@ -413,9 +413,4 @@ string, it will remove centering."
     (plist-put plist :maptype maptype)
     (apply 'google-maps-static-show plist)))
 
-(defun google-maps-static (location)
-  "Run Google Maps on LOCATION."
-  (interactive (list (read-string "Location: ")))
-  (google-maps-static-show :markers `(((,location)))))
-
 (provide 'google-maps-static)
