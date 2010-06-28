@@ -47,6 +47,10 @@ string."
                sequence))
    separator))
 
+(defun google-maps-symbol-to-property (symbol)
+  "Transform SYMBOL to :SYMBOL."
+  (intern-soft (concat ":" (symbol-name symbol))))
+
 (defun google-maps-build-plist (plist)
   "Build a property list based on PLIST."
   (unless (plist-member plist :sensor)
@@ -82,7 +86,7 @@ PROPERTIES should have form '((property-name . format))."
      'null
      (lambda (entry)
        (let* ((property (car entry))
-              (propsym (google-maps-static-symbol-to-property property))
+              (propsym (google-maps-symbol-to-property property))
               (value (plist-get plist propsym))
               (value-format (or (cdr entry) 'identity))
               ;; If value-format is list or function, eval

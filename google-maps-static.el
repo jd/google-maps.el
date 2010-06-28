@@ -78,10 +78,6 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-static-params)
 
-(defun google-maps-static-symbol-to-property (symbol)
-  "Transform SYMBOL to :SYMBOL."
-  (intern-soft (concat ":" (symbol-name symbol))))
-
 (defun google-maps-static-marker-to-url-parameters (marker)
   (let ((prop (google-maps-urlencode-plist
                (cdr marker)
