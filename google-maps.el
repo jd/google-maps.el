@@ -26,6 +26,7 @@
 (eval-when-compile
   (require 'cl))
 
+(require 'thingatpt)
 (require 'google-maps-geocode)
 (require 'google-maps-static)
 
@@ -34,7 +35,15 @@
   "Run Google Maps on LOCATION.
 If NO-GEOCODING is t, then does not try to geocode the address
 and do not ask the user for a more precise location."
-  (interactive (list (read-string "Location: ")))
+  (interactive
+   (list
+    (if (use-region-p)
+	(buffer-substring-no-properties
+         (region-beginning) (region-end))
+      (read-string "Location: "
+                   (replace-regexp-in-string
+                    "\n" " "
+                    (thing-at-point 'sentence))))))
   (let ((location (if no-geocoding
                       location
                     (google-maps-geocode-location location))))
