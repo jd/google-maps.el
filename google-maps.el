@@ -29,6 +29,7 @@
 (require 'google-maps-geocode)
 (require 'google-maps-static)
 
+;;;###autoload
 (defun google-maps (location &optional no-geocoding)
   "Run Google Maps on LOCATION.
 If NO-GEOCODING is t, then does not try to geocode the address
