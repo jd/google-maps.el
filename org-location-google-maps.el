@@ -39,7 +39,7 @@
     (when location
       (google-maps location))))
 
-(define-key org-mode-map "\C-c\M-l" 'jd:org-google-maps-location)
+(define-key org-mode-map "\C-c\M-l" 'org-location-google-maps)
 
 (defun org-agenda-location-google-maps ()
   "Show Google Map for location of an Org entry in an org-agenda buffer."
@@ -51,6 +51,6 @@
     (when location
       (google-maps location))))
 
-(define-key org-agenda-mode-map "\C-c\M-l" 'jd:org-agenda-google-maps-location)
+(define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps)
 
 (provide 'org-location-google-maps)
