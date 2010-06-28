@@ -100,7 +100,7 @@ If there is several results, the user is asked to pick one via
     (t (google-maps-geocode-results->one-result-picked-by-user results))))
 
 (defun google-maps-geocode-location (location)
-  (let* ((req (google-maps-geocode-request location))
+  (let* ((req (google-maps-geocode-request :address location))
          (status (google-maps-geocode-request->status req)))
     (unless (eq status 'ok)
       (error (format "Unable to geocode %s: %s" location status)))
