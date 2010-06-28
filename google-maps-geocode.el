@@ -1,4 +1,4 @@
-;;; google-maps-geocode.el --- Encode address
+;;; google-maps-geocode.el --- Geocode address using Google Maps service
 
 ;; Copyright (C) 2010 Free Software Foundation, Inc.
 
