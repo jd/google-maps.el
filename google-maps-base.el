@@ -57,25 +57,19 @@ string."
     (plist-put plist :sensor google-maps-default-sensor))
   plist)
 
-(defun google-maps-skip-http-headers (buffer)
-  "Remove HTTP headers from BUFFER, and return it.
-Assumes headers are indeed present!"
-  (with-current-buffer buffer
-    (widen)
-    (goto-char (point-min))
-    (search-forward "\n\n")
-    (delete-region (point-min) (point))
-    buffer))
-
 (defun google-maps-retrieve-data (url)
-  "Retrieve image and return its data as string, using URL to the
-image."
-  (let* ((image-buffer (google-maps-skip-http-headers
-                        (url-retrieve-synchronously url)))
-         (data (with-current-buffer image-buffer
-                 (buffer-string))))
-    (kill-buffer image-buffer)
-    data))
+  "Retrieve URL and return its data as string."
+  (let* ((buffer (url-retrieve-synchronously url))
+         data)
+    (with-current-buffer buffer
+      (search-forward "\n\n")
+      (when (string-match-p
+             "^Content-Type: .+; charset=UTF-8$"
+             (buffer-substring (point-min) (point)))
+        (set-buffer-multibyte t))
+      (setq data (buffer-substring (point) (point-max)))
+      (kill-buffer)
+      data)))
 
 (defun google-maps-urlencode-plist (plist properties &optional eqs separator)
   "Encode PLIST for a URL using PROPERTIES.
