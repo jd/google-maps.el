@@ -99,4 +99,4 @@ PROPERTIES should have form '((property-name . format))."
      properties
      separator)))
 
-(provide 'google-maps)
+(provide 'google-maps-base)

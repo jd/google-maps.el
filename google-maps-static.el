@@ -42,7 +42,7 @@
 (eval-when-compile
   (require 'cl))
 
-(require 'google-maps)
+(require 'google-maps-base)
 (require 'url-util)
 (require 'url-http)
 

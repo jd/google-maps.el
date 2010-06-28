@@ -27,7 +27,7 @@
   (require 'cl))
 
 (require 'json)
-(require 'google-maps)
+(require 'google-maps-base)
 
 (defconst google-maps-geocode-uri
   "http://maps.google.com/maps/api/geocode/json"
