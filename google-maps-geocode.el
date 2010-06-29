@@ -1,6 +1,6 @@
 ;;; google-maps-geocode.el --- Geocode address using Google Maps service
 
-;; Copyright (C) 2010 Free Software Foundation, Inc.
+;; Copyright (C) 2010 Julien Danjou
 
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: comm

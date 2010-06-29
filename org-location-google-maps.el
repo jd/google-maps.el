@@ -1,6 +1,6 @@
 ;;; org-location-google-maps.el --- Show Google Maps' map for an Org entry location
 
-;; Copyright (C) 2010 Free Software Foundation, Inc.
+;; Copyright (C) 2010 Julien Danjou
 
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: comm

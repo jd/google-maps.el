@@ -1,6 +1,6 @@
 ;;; google-maps-static.el --- Access Google Maps Static from Emacs
 
-;; Copyright (C) 2010 Free Software Foundation, Inc.
+;; Copyright (C) 2010 Julien Danjou
 
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: comm

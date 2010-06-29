@@ -1,6 +1,6 @@
 ;;; google-maps.el --- Access Google Maps from Emacs
 
-;; Copyright (C) 2010 Free Software Foundation, Inc.
+;; Copyright (C) 2010 Julien Danjou
 
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: comm
@@ -26,7 +26,6 @@
 (eval-when-compile
   (require 'cl))
 
-(require 'thingatpt)
 (require 'google-maps-geocode)
 (require 'google-maps-static)
 
@@ -40,10 +39,7 @@ and do not ask the user for a more precise location."
     (if (use-region-p)
 	(buffer-substring-no-properties
          (region-beginning) (region-end))
-      (read-string "Location: "
-                   (replace-regexp-in-string
-                    "\n" " "
-                    (or (thing-at-point 'sentence) ""))))))
+      (read-string "Location: "))))
   (let ((location (if no-geocoding
                       location
                     (google-maps-geocode-location location))))
