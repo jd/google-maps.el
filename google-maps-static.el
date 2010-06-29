@@ -34,7 +34,6 @@
 ;;            . (:weight 3 :color "black" :fillcolor "yellow"))))
 ;;
 ;;; TODO:
-;; - Add current map information
 ;; - Resize map if frame is resized
 ;; - Add interactive code to build path
 ;;
@@ -191,7 +190,50 @@ PATHS should have the form
          (concat "&path=" (google-maps-static-paths-to-url-parameters paths))
      ""))))
 
-(defun google-maps-static-insert-image-at-point (start image format)
+(defun google-maps-static-build-info-string (plist)
+  "Build a informative string describin PLIST."
+  (let ((center (plist-get plist :center))
+        (visible (plist-get plist :visible))
+        (markers (plist-get plist :markers))
+        (paths (plist-get plist :paths)))
+    (concat
+     (when center
+       (format "Center: %s\n" center))
+     (when visible
+       (format "Visible: %s\n" (mapconcat 'identity visible ", ")))
+     (when markers
+       (format "Markers:\n%s\n"
+               (mapconcat (lambda (marker)
+                            (let* ((prop (cdr marker))
+                                   (label (plist-get prop :label))
+                                   (size (plist-get prop :size))
+                                   ;; If size is small or tiny, label is not visible
+                                   (label (cond ((or (eq size 'small)
+                                                     (eq size 'tiny))
+                                                 ?○)
+                                                ((null label) ?●)
+                                                ((and
+                                                  (>= label ?A)
+                                                  (<= label ?Z))
+                                                 (+ label 9333))
+                                                ((and
+                                                  (>= label ?1)
+                                                  (<= label ?9))
+                                                 (+ label 9263))
+                                                (t ?●))))
+                              (concat " " (char-to-string label) ":\t"
+                                      (mapconcat 'identity (car marker) "\n\t"))))
+                          markers
+                          "\n")))
+     (when paths
+       (format "Paths:\n%s\n"
+               (mapconcat (lambda (path)
+                            (concat "\t"
+                                    (mapconcat 'identity (car path) " → ")))
+                          paths
+                          "\n"))))))
+
+(defun google-maps-static-insert-image-at-point (start image format help-echo)
   "Insert an IMAGE with FORMAT at point START."
   (goto-char start)
   (insert "Map")
@@ -199,6 +241,7 @@ PATHS should have the form
    start (point)
    `(display
      ,(create-image image format t)
+     help-echo ,help-echo
      read-only t
      rear-nonsticky (display read-only))))
 
@@ -244,7 +287,8 @@ PLIST can contains this properties:
       (google-maps-static-insert-image-at-point
        (point-min)
        (google-maps-retrieve-data url)
-       (plist-get plist :format)))))
+       (plist-get plist :format)
+       (google-maps-static-build-info-string plist)))))
 
 (defvar google-maps-static-mode-map
   (let ((map (make-sparse-keymap)))
