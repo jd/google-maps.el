@@ -80,8 +80,7 @@
 (defun google-maps-static-marker-to-url-parameters (marker)
   (let ((prop (google-maps-urlencode-plist
                (cdr marker)
-               '((size . (lambda (size)
-                           (when size (number-to-string size))))
+               '((size)
                  (color)
                  (label . (lambda (label)
                             (when label (char-to-string label)))))
