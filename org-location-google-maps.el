@@ -35,7 +35,7 @@
 (defun org-location-google-maps ()
   "Show Google Map for location of an Org entry in an org buffer."
   (interactive)
-  (let ((location (org-entry-get nil "LOCATION")))
+  (let ((location (org-entry-get nil "LOCATION" t)))
     (when location
       (google-maps location))))
 
@@ -47,7 +47,7 @@
   (let ((location
          (save-window-excursion
            (org-agenda-goto)
-           (org-entry-get nil "LOCATION"))))
+           (org-entry-get nil "LOCATION" t))))
     (when location
       (google-maps location))))
 
