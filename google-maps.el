@@ -36,7 +36,7 @@ If NO-GEOCODING is t, then does not try to geocode the address
 and do not ask the user for a more precise location."
   (interactive
    (list
-    (if (use-region-p)
+    (if (and transient-mark-mode mark-active)
 	(buffer-substring-no-properties
          (region-beginning) (region-end))
       (read-string "Location: "))))

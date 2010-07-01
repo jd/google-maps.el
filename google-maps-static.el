@@ -345,7 +345,7 @@ PLIST can contains this properties:
 (defun google-maps-static-quit ()
   "Kill Google maps buffer."
   (interactive)
-  (kill-buffer))
+  (kill-buffer (current-buffer)))
 
 (defun google-maps-static-copy-url ()
   "Kill Google maps buffer."

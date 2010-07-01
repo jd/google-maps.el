@@ -64,12 +64,12 @@ string."
     (with-current-buffer buffer
       (goto-char (point-min))
       (search-forward "\n\n")
-      (when (string-match-p
+      (when (string-match
              "^Content-Type: .+; charset=UTF-8$"
              (buffer-substring (point-min) (point)))
         (set-buffer-multibyte t))
       (setq data (buffer-substring (point) (point-max)))
-      (kill-buffer)
+      (kill-buffer (current-buffer))
       data)))
 
 (defun google-maps-urlencode-plist (plist properties &optional eqs separator)
