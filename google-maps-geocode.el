@@ -56,7 +56,7 @@ It should returned `ok' if everything went well."
 
 (defun google-maps-geocode-request-is-ok (data)
   "Return t if the geocoding via `google-maps-geocode' went fine."
-  (eq (google-maps-geocode-status data) 'ok))
+  (eq (google-maps-geocode-request->status data) 'ok))
 
 (defun google-maps-geocode-request->results (data)
   "Return result list of a `google-maps-geocode' request."
