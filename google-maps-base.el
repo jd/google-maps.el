@@ -25,6 +25,9 @@
 ;;
 ;;; Code:
 
+(eval-when-compile
+  (require 'cl))
+
 (defgroup google-maps nil
   "Google Maps."
   :group 'comm)
