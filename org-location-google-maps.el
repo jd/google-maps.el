@@ -29,6 +29,7 @@
 ;;; Code:
 
 (require 'google-maps)
+(require 'google-maps-geocode)
 (require 'org)
 (require 'org-agenda)
 
@@ -52,5 +53,13 @@
       (google-maps location))))
 
 (define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps)
+
+(defun org-location-google-geocode-set (location)
+  "Set location property to LOCATION for current entry using Google Geocoding API."
+  (interactive
+   (list (read-string "Location: ")))
+  (org-set-property "LOCATION" (google-maps-geocode-location location)))
+
+(define-key org-mode-map "\C-c\M-L" 'org-location-google-geocode-set)
 
 (provide 'org-location-google-maps)
