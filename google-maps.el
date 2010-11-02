@@ -44,6 +44,11 @@ and do not ask the user for a more precise location."
                       location
                     (cdr (assoc 'formatted_address
                                 (google-maps-geocode-location location))))))
-    (google-maps-static-show :markers `(((,location))))))
+    (setq jd:arf (google-maps-geocode-location "paris"))
+    (google-maps-static-show :markers `(((,location)))
+                             ;; Center the location. This is useful to set
+                             ;; this to be able to move on the map just
+                             ;; after.
+                             :center location)))
 
 (provide 'google-maps)
