@@ -213,8 +213,11 @@ PATHS should have the form
   (let ((center (plist-get plist :center))
         (visible (plist-get plist :visible))
         (markers (plist-get plist :markers))
-        (paths (plist-get plist :paths)))
+        (paths (plist-get plist :paths))
+        (zoom (plist-get plist :zoom)))
     (concat
+     (when zoom
+       (format "Zoom level: %d\n" zoom))
      (when center
        (format "Center: %s\n" (if (listp center) (car center) center)))
      (when visible
