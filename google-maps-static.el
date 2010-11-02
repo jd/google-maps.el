@@ -56,7 +56,7 @@
   "Name of the Google Maps buffer."
   :group 'google-maps-static)
 
-(defcustom google-maps-static-default-zoom 5
+(defcustom google-maps-static-default-zoom 15
   "Default zoom level when calling `google-maps-static-zoom' with no argument."
   :group 'google-maps-static)
 
