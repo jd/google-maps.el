@@ -208,6 +208,15 @@ PATHS should have the form
          (concat "&path=" (google-maps-static-paths-to-url-parameters paths))
      ""))))
 
+(defun google-maps-static-build-location-string (location)
+  "Build a string to display from a LOCATION."
+  (if (listp location)
+      (format "%s (%f, %f)"
+              (car location)
+              (cdr (assoc 'lat (cadr location)))
+              (cdr (assoc 'lng (cadr location))))
+    location))
+
 (defun google-maps-static-build-info-string (plist)
   "Build a informative string describin PLIST."
   (let ((center (plist-get plist :center))
@@ -219,9 +228,9 @@ PATHS should have the form
      (when zoom
        (format "Zoom level: %d\n" zoom))
      (when center
-       (format "Center: %s\n" (if (listp center) (car center) center)))
+       (format "Center: %s\n" (google-maps-static-build-location-string center)))
      (when visible
-       (format "Visible: %s\n" (mapconcat 'identity visible ", ")))
+       (format "Visible: %s\n" (mapconcat 'google-maps-static-build-location-string visible ", ")))
      (when markers
        (format "Markers:\n%s\n"
                (mapconcat (lambda (marker)
@@ -243,14 +252,16 @@ PATHS should have the form
                                                  (+ label 9263))
                                                 (t ?●))))
                               (concat " " (char-to-string label) ":\t"
-                                      (mapconcat 'identity (car marker) "\n\t"))))
+                                      (mapconcat 'google-maps-static-build-location-string
+                                                 (car marker) "\n\t"))))
                           markers
                           "\n")))
      (when paths
        (format "Paths:\n%s\n"
                (mapconcat (lambda (path)
                             (concat "\t"
-                                    (mapconcat 'identity (car path) " → ")))
+                                    (mapconcat 'google-maps-static-build-location-string
+                                               (car path) " → ")))
                           paths
                           "\n"))))))
 
