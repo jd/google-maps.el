@@ -33,6 +33,10 @@
 ;;  :paths '((("Tour Eiffel, Paris" "Arc de triomphe, Paris" "Panthéon, Paris")
 ;;            . (:weight 3 :color "black" :fillcolor "yellow"))))
 ;;
+;; All address can be specified as string, or with a format like this:
+;;
+;; (LOCATION_NAME ((lat . LATITUDE) (lng. LONGITUDE)))
+;;
 ;;; TODO:
 ;; - Resize map if frame is resized
 ;; - Add interactive code to build path
@@ -76,6 +80,20 @@
   "Current parameters of the map.")
 (make-variable-buffer-local 'google-maps-static-params)
 
+(defun google-maps-static-urlencode-location (location)
+  "Decode a location.
+Location format can be either a string, which is returned as it
+is, or a list in format:
+
+  (LOCATION ((lat . LATVALUE) (lng . LNGVALUE)))
+
+In such case, latvalue,lngvalue is returned."
+  (when location
+    (if (listp location)
+        (format "%f,%f"
+                (cdr (assoc 'lat (cadr location))) (cdr (assoc 'lng (cadr location))))
+      (url-hexify-string location))))
+
 (defun google-maps-static-marker-to-url-parameters (marker)
   (let ((prop (google-maps-urlencode-plist
                (cdr marker)
@@ -88,7 +106,7 @@
     (concat
      (when prop (concat prop "|"))
      (mapconcat
-      'url-hexify-string
+      'google-maps-static-urlencode-location
       (car marker)
       "|"))))
 
@@ -103,7 +121,7 @@ MARKERS should have the form
 (defun google-maps-static-visible-to-url-parameters (visible)
   "From VISIBLE, build parameters for a Google Static Maps URL.
 VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
-  (mapconcat 'url-hexify-string
+  (mapconcat 'google-maps-static-urlencode-location
              visible
              "|"))
 
@@ -120,7 +138,7 @@ VISIBLE should have the form '(\"loc1\" \"loc2\" ... \"locN\")."
     (concat
      (when prop (concat prop "|"))
      (mapconcat
-      'url-hexify-string
+      'google-maps-static-urlencode-location
       (car path)
       "|"))))
 
@@ -169,7 +187,7 @@ PATHS should have the form
    (google-maps-urlencode-plist
     plist
     `((format)
-      (center . url-hexify-string)
+      (center . google-maps-static-urlencode-location)
       (size . ,(format "%dx%d"
                        (plist-get plist :width)
                        (plist-get plist :height)))
@@ -198,7 +216,7 @@ PATHS should have the form
         (paths (plist-get plist :paths)))
     (concat
      (when center
-       (format "Center: %s\n" center))
+       (format "Center: %s\n" (if (listp center) (car center) center)))
      (when visible
        (format "Visible: %s\n" (mapconcat 'identity visible ", ")))
      (when markers
@@ -251,6 +269,8 @@ PATHS should have the form
 PLIST can contains this properties:
 
  :center   Where to center the map.
+           This is either a string, or a list with format:
+           (LOCATION_NAME ((lat . LATVALUE) (lng . LNGVALUE)))
  :zoom     Zoom level on the map.
  :sensor   Specifies whether the application requesting the static
            map is using a sensor to determine the user's
@@ -360,7 +380,10 @@ PLIST can contains this properties:
   (let* ((plist google-maps-static-params)
          (visible (plist-get plist :visible)))
     (plist-put plist :visible (add-to-list 'visible
-                                           (google-maps-geocode-location location)))
+                                           (cdr
+                                            (assoc
+                                             'formatted_address
+                                             (google-maps-geocode-location location)))))
     (apply 'google-maps-static-show plist)))
 
 (defun google-maps-static-remove-visible (location)
@@ -392,8 +415,8 @@ specify SIZE and COLOR of the LABEL."
     (read-char "Type a character to use as mark for location.")))
   (let* ((plist google-maps-static-params)
          (markers (plist-get plist :markers)))
-    (add-to-list 'markers `((,(google-maps-geocode-location location))
-                             . (:label ,label :size ,size :color ,color)))
+    (add-to-list 'markers `((,(cdr (assoc 'formatted_address (google-maps-geocode-location location))))
+                            . (:label ,label :size ,size :color ,color)))
     (plist-put plist :markers markers)
     (apply 'google-maps-static-show plist)))
 
@@ -429,8 +452,11 @@ string, it will remove centering."
   (interactive
    (list
     (read-string "Location to center the map on: ")))
-  (let ((plist google-maps-static-params))
-    (plist-put plist :center (google-maps-geocode-location location))
+  (let* ((plist google-maps-static-params)
+         (center (google-maps-geocode-location location))
+         (address (cdr (assoc 'formatted_address center)))
+         (location (cdr (assoc 'location (assoc 'geometry center)))))
+    (plist-put plist :center `(,address ,location))
     (apply 'google-maps-static-show plist)))
 
 (defun google-maps-static-event-to-buffer (event)

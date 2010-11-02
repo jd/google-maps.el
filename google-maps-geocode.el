@@ -114,17 +114,16 @@ If there is several results, the user is asked to pick one via
          (status (google-maps-geocode-request->status req)))
     (unless (eq status 'ok)
       (error (format "Unable to geocode %s: %s" location status)))
-    (setq location
-          (cdr (assoc 'formatted_address
-                      (google-maps-geocode-results->one-result
-                       (google-maps-geocode-request->results req)))))))
+    (google-maps-geocode-results->one-result
+     (google-maps-geocode-request->results req))))
 
 ;;;###autoload
 (defun google-maps-geocode-replace-region (beg end)
   "Geocode region and replace it with a more accurate result."
   (interactive "r")
-  (let ((location (google-maps-geocode-location
-                   (buffer-substring beg end))))
+  (let ((location (cdr (assoc 'formatted_address
+                              (google-maps-geocode-location
+                               (buffer-substring beg end))))))
     (delete-region beg end)
     (insert location)))
 

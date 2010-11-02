@@ -42,7 +42,8 @@ and do not ask the user for a more precise location."
       (read-string "Location: "))))
   (let ((location (if no-geocoding
                       location
-                    (google-maps-geocode-location location))))
+                    (cdr (assoc 'formatted_address
+                                (google-maps-geocode-location location))))))
     (google-maps-static-show :markers `(((,location))))))
 
 (provide 'google-maps)
