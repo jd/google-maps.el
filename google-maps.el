@@ -42,13 +42,14 @@ and do not ask the user for a more precise location."
       (read-string "Location: "))))
   (let ((location (if no-geocoding
                       location
-                    (cdr (assoc 'formatted_address
-                                (google-maps-geocode-location location))))))
-    (setq jd:arf (google-maps-geocode-location "paris"))
+                    (let ((location (google-maps-geocode-location location)))
+                      (list (cdr (assoc 'formatted_address location))
+                            (cdr (assoc 'location (assoc 'geometry location))))))))
     (google-maps-static-show :markers `(((,location)))
                              ;; Center the location. This is useful to set
                              ;; this to be able to move on the map just
                              ;; after.
+                             :zoom google-maps-static-default-zoom
                              :center location)))
 
 (provide 'google-maps)
