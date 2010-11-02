@@ -66,7 +66,17 @@ It should returned `ok' if everything went well."
   "Request geocoding of a location and return the request result.
 Request status can be retrieved with
 `google-maps-geocode-request->status'. Request results data can
-be retrieve ed with `google-maps-geocode-request->results'."
+be retrieve ed with `google-maps-geocode-request->results'.
+
+Valid params are:
+
+  :address  The address to geocode.
+  :sensor   Boolean indicating if this call is used for a sensor
+            device.
+  :latlng   Coordinates.
+  :region   Region.
+  :bounds   Bounding box.
+  :language Language to use in returned data."
   (json-read-from-string
    (google-maps-retrieve-data
     (google-maps-geocode-build-url
