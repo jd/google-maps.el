@@ -340,6 +340,10 @@ PLIST can contains this properties:
     (define-key map (kbd "c") 'google-maps-static-center)
     (define-key map (kbd "t") 'google-maps-static-set-maptype)
     (define-key map (kbd "g") 'google-maps-static-refresh)
+    (define-key map (kbd "<Up>") 'google-maps-static-move-north)
+    (define-key map (kbd "<Down>") 'google-maps-static-move-south)
+    (define-key map (kbd "<Left>") 'google-maps-static-move-west)
+    (define-key map (kbd "<Right>") 'google-maps-static-move-east)
     (define-key map [mouse-4] 'google-maps-static-zoom-mouse-in)
     (define-key map [mouse-5] 'google-maps-static-zoom-mouse-out)
     map)
@@ -497,5 +501,38 @@ string, it will remove centering."
   (let ((plist google-maps-static-params))
     (plist-put plist :maptype maptype)
     (apply 'google-maps-static-show plist)))
+
+(defmacro google-maps-static-defun-move (direction lat-or-lng operation)
+  `(defun ,(intern (concat "google-maps-static-move-" direction)) ()
+     ,(concat "Move map towards " direction ".")
+     (interactive)
+     (let* ((plist google-maps-static-params)
+            (center (plist-get plist :center))
+            (zoom (plist-get plist :zoom)))
+       (unless center
+         (error (format
+                 "The map is not centered. Press %s to center."
+                 (with-temp-buffer
+                   (where-is 'google-maps-static-center t)
+                   (buffer-string)))))
+       (unless (listp center)
+         (error ("The center location has no coordinates.")))
+       (unless zoom
+         (error (format
+                 "The map has no zoom level. Press %s to set a zoom level."
+                 (with-temp-buffer
+                   (where-is 'google-maps-static-zoom t)
+                   (buffer-string)))))
+       (let ((value (assoc ,lat-or-lng (cadr center))))
+         (setcar center "")
+         ;; Zoom ratio seems to be 2, so `2^zoom * value' move the map quite
+         ;; correctly.
+         (setcdr value (,operation (cdr value) (* 0.0001 (expt 2 (- 21 zoom)))))
+         (apply 'google-maps-static-show plist)))))
+
+(google-maps-static-defun-move "north" 'lat +)
+(google-maps-static-defun-move "south" 'lat -)
+(google-maps-static-defun-move "west" 'lng -)
+(google-maps-static-defun-move "east" 'lng +)
 
 (provide 'google-maps-static)
