@@ -345,6 +345,7 @@ PLIST can contains this properties:
     (define-key map (kbd "m") 'google-maps-static-manage-marker)
     (define-key map (kbd "v") 'google-maps-static-manage-visible)
     (define-key map (kbd "c") 'google-maps-static-center)
+    (define-key map (kbd "C") 'google-maps-static-center-remove)
     (define-key map (kbd "t") 'google-maps-static-set-maptype)
     (define-key map (kbd "g") 'google-maps-static-refresh)
     (define-key map (kbd "<up>") 'google-maps-static-move-north)
@@ -482,6 +483,13 @@ string, it will remove centering."
          (location (cdr (assoc 'location (assoc 'geometry center)))))
     (apply 'google-maps-static-show
            (plist-put plist :center `(,address ,location)))))
+
+(defun google-maps-static-center-remove ()
+  "Do not center the map."
+  (interactive)
+  (let ((plist google-maps-static-params))
+    (apply 'google-maps-static-show
+           (plist-put plist :center nil))))
 
 (defun google-maps-static-event-to-buffer (event)
   (window-buffer (posn-window (event-start event))))
