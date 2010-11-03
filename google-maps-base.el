@@ -101,11 +101,12 @@ to 0 force a cache renewal."
     (with-current-buffer buffer
       (goto-char (point-min))
       (search-forward "\n\n")
-      (if (string-match-p
-           "^Content-Type: .+; charset=UTF-8$"
-           (buffer-substring (point-min) (point)))
-          (set-buffer-multibyte t)
-        (set-buffer-multibyte nil))
+      (let ((headers (buffer-substring (point-min) (point))))
+        (unless (string-match-p "^HTTP/1.1 200 OK" headers)
+          (error "Unable to fetch data"))
+        (if (string-match-p "^Content-Type: .+; charset=UTF-8$" headers)
+            (set-buffer-multibyte t)
+          (set-buffer-multibyte nil)))
       (setq data (buffer-substring (point) (point-max)))
       (when (and expired expire-time)
         (url-store-in-cache (current-buffer)))
