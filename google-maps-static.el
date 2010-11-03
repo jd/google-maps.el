@@ -155,9 +155,9 @@ PATHS should have the form
 (defun google-maps-static-set-size (plist)
   "adapt size to current window settings"
   (let ((edges (window-inside-pixel-edges)))
-    (plist-put plist :width (- (nth 2 edges) (nth 0 edges) ))
-    (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))
-    plist))
+    (plist-put
+     (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))
+     :width (- (nth 2 edges) (nth 0 edges) ))))
 
 (defun google-maps-static-refresh (&optional force)
   "Redisplay the map."
@@ -171,19 +171,20 @@ PATHS should have the form
   "Build a property list based on PLIST."
   ;; Make all markers upper case
   (let ((markers (plist-get plist :markers)))
-    (when markers
-      (plist-put plist :markers
-                 (mapcar
-                  (lambda (marker)
-                    (let ((props (cdr marker)))
-                      (when props
-                        (let ((label (plist-get props :label)))
-                          (when label
-                            (plist-put props :label (upcase label))))))
-                      marker)
-                  markers))))
-  (google-maps-static-set-size
-   (google-maps-build-plist plist)))
+    (google-maps-static-set-size
+     (google-maps-build-plist
+      (if markers
+          (plist-put plist :markers
+                     (mapcar
+                      (lambda (marker)
+                        (let ((props (cdr marker)))
+                          (when props
+                            (let ((label (plist-get props :label)))
+                              (when label
+                                (plist-put props :label (upcase label))))))
+                        marker)
+                      markers))
+        plist)))))
 
 (defun google-maps-static-build-url (plist)
   "Build a URL to request a static Google Map."
@@ -367,10 +368,11 @@ PLIST can contains this properties:
   (interactive "P")
   (let ((plist google-maps-static-params)
         (level (or level google-maps-static-default-zoom)))
-    (plist-put plist
-               :zoom
-               (max (min level google-maps-static-maximum-zoom) google-maps-static-minimum-zoom))
-    (apply 'google-maps-static-show plist)))
+    (apply 'google-maps-static-show
+           (plist-put plist
+                      :zoom
+                      (max (min level google-maps-static-maximum-zoom)
+                           google-maps-static-minimum-zoom)))))
 
 (defun google-maps-static-zoom-in ()
   "Zoom a Google map in."
@@ -403,12 +405,12 @@ PLIST can contains this properties:
     (read-string "Location to set visible: ")))
   (let* ((plist google-maps-static-params)
          (visible (plist-get plist :visible)))
-    (plist-put plist :visible (add-to-list 'visible
-                                           (cdr
-                                            (assoc
-                                             'formatted_address
-                                             (google-maps-geocode-location location)))))
-    (apply 'google-maps-static-show plist)))
+    (apply 'google-maps-static-show
+           (plist-put plist :visible (add-to-list 'visible
+                                                  (cdr
+                                                   (assoc
+                                                    'formatted_address
+                                                    (google-maps-geocode-location location))))))))
 
 (defun google-maps-static-remove-visible (location)
   "Remove a visible LOCATION on the map."
@@ -419,9 +421,9 @@ PLIST can contains this properties:
       (completing-read "Location to unset visible: " visible nil t))))
   (let* ((plist google-maps-static-params)
          (visible (plist-get plist :visible)))
-    (plist-put plist :visible
-               (remove-if `(lambda (l) (string= l ,location)) visible))
-    (apply 'google-maps-static-show plist)))
+    (apply 'google-maps-static-show
+           (plist-put plist :visible
+                      (remove-if `(lambda (l) (string= l ,location)) visible)))))
 
 (defun google-maps-static-manage-visible (remove)
   "Add or remove a visible location. If REMOVE is set, remove it."
@@ -437,27 +439,25 @@ specify SIZE and COLOR of the LABEL."
    (list
     (read-string "Location to mark: ")
     (read-char "Type a character to use as mark for location.")))
-  (let* ((plist google-maps-static-params)
-         (markers (plist-get plist :markers)))
-    (add-to-list 'markers `((,(cdr (assoc 'formatted_address (google-maps-geocode-location location))))
-                            . (:label ,label :size ,size :color ,color)))
-    (plist-put plist :markers markers)
-    (apply 'google-maps-static-show plist)))
+  (let ((plist google-maps-static-params))
+    (apply 'google-maps-static-show
+           (plist-put plist :markers
+                      (append (plist-get plist :markers)
+                              `(((,(cdr (assoc 'formatted_address (google-maps-geocode-location location))))
+                                 . (:label ,label :size ,size :color ,color))))))))
 
 (defun google-maps-static-remove-marker (label)
   "Remove a marker from the map."
   (interactive
    (list
     (read-char "Type the mark character to remove from the map.")))
-  (let ((label (upcase label)))
-    (let* ((plist google-maps-static-params)
-           (markers (plist-get plist :markers)))
-      (plist-put plist :markers
-                 (remove-if
-                  (lambda (marker)
-                    (eq (plist-get (cdr marker) :label) label))
-                  markers))
-      (apply 'google-maps-static-show plist))))
+  (let ((plist google-maps-static-params)
+        (label (upcase label)))
+    (apply 'google-maps-static-show (plist-put plist :markers
+                                               (remove-if
+                                                (lambda (marker)
+                                                  (eq (plist-get (cdr marker) :label) label))
+                                                (plist-get plist :markers))))))
 
 (defun google-maps-static-manage-marker (times)
   "Remove or add markers on the map.
@@ -480,8 +480,8 @@ string, it will remove centering."
          (center (google-maps-geocode-location location))
          (address (cdr (assoc 'formatted_address center)))
          (location (cdr (assoc 'location (assoc 'geometry center)))))
-    (plist-put plist :center `(,address ,location))
-    (apply 'google-maps-static-show plist)))
+    (apply 'google-maps-static-show
+           (plist-put plist :center `(,address ,location)))))
 
 (defun google-maps-static-event-to-buffer (event)
   (window-buffer (posn-window (event-start event))))
@@ -505,8 +505,8 @@ string, it will remove centering."
     (intern
      (completing-read "Map type: " google-maps-static-maptypes nil t))))
   (let ((plist google-maps-static-params))
-    (plist-put plist :maptype maptype)
-    (apply 'google-maps-static-show plist)))
+    (apply 'google-maps-static-show
+           (plist-put plist :maptype maptype))))
 
 (defmacro google-maps-static-defun-move (direction lat-or-lng operation)
   `(defun ,(intern (concat "google-maps-static-move-" direction)) ()
@@ -534,15 +534,19 @@ string, it will remove centering."
               (coordinates (delq value coordinates)))
          ;; Zoom ratio seems to be 2, so `2^zoom * value' move the map quite
          ;; correctly.
-         (plist-put plist :center
-                    (list "" (append
-                              coordinates
-                              (list
-                               (cons ,lat-or-lng
-                                     (,operation
-                                      (cdr value)
-                                      (* 0.00008 (expt 2 (- google-maps-static-maximum-zoom zoom)))))))))
-         (apply 'google-maps-static-show plist)))))
+         (apply
+          'google-maps-static-show
+          (plist-put
+           plist :center
+           (list "" (append
+                     coordinates
+                     (list
+                      (cons ,lat-or-lng
+                            (,operation
+                             (cdr value)
+                             (* 0.00008
+                                (expt 2
+                                      (- google-maps-static-maximum-zoom zoom))))))))))))))
 
 (google-maps-static-defun-move "north" 'lat +)
 (google-maps-static-defun-move "south" 'lat -)
