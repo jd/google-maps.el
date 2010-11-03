@@ -62,6 +62,11 @@
   :group 'google-maps-static
   :type 'integer)
 
+(defcustom google-maps-static-move-step 0.00008
+  "Value used to define a step value when moving."
+  :group 'google-maps-static
+  :type 'float)
+
 (defconst google-maps-static-uri
   "http://maps.google.com/maps/api/staticmap"
   "Google Maps API server.")
@@ -552,7 +557,7 @@ string, it will remove centering."
                       (cons ,lat-or-lng
                             (,operation
                              (cdr value)
-                             (* 0.00008
+                             (* google-maps-static-move-step
                                 (expt 2
                                       (- google-maps-static-maximum-zoom zoom))))))))))))))
 
