@@ -33,12 +33,24 @@
 (require 'org)
 (require 'org-agenda)
 
-(defun org-location-google-maps ()
-  "Show Google Map for location of an Org entry in an org buffer."
-  (interactive)
+(defun org-location-google-maps (&optional with-current-location)
+  "Show Google Map for location of an Org entry in an org buffer.
+If WITH-CURRENT-LOCATION prefix is set, add a marker with current
+location. Current location is determined using
+`calendar-location-name', `calendar-latitude' and
+`calendar-longitude' variable."
+  (interactive "P")
   (let ((location (org-entry-get nil "LOCATION" t)))
     (when location
-      (google-maps location))))
+      (let ((buffer (google-maps location)))
+        (when (and with-current-location
+                   calendar-latitude
+                   calendar-longitude
+                   calendar-location-name)
+          (google-maps-static-add-marker `(,(eval calendar-location-name)
+                                            ((lat . ,calendar-latitude)
+                                             (lng . ,calendar-longitude)))
+                                         ?H))))))
 
 (define-key org-mode-map "\C-c\M-l" 'org-location-google-maps)
 
