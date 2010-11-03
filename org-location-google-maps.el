@@ -48,8 +48,8 @@ location. Current location is determined using
                    calendar-longitude
                    calendar-location-name)
           (google-maps-static-add-marker `(,(eval calendar-location-name)
-                                            ((lat . ,calendar-latitude)
-                                             (lng . ,calendar-longitude)))
+                                            ((lat . ,(calendar-latitude))
+                                             (lng . ,(calendar-longitude))))
                                          ?H))))))
 
 (define-key org-mode-map "\C-c\M-l" 'org-location-google-maps)
