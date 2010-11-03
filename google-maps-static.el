@@ -523,13 +523,19 @@ string, it will remove centering."
                  (with-temp-buffer
                    (where-is 'google-maps-static-zoom t)
                    (buffer-string)))))
-       (let ((value (assoc ,lat-or-lng (cadr center))))
-         (setcar center "")
+       (let* ((coordinates (copy-list (cadr center)))
+              (value (assoc ,lat-or-lng coordinates))
+              (coordinates (delq value coordinates)))
          ;; Zoom ratio seems to be 2, so `2^zoom * value' move the map quite
          ;; correctly.
-         ;; FIXME THIS IS A BUG, we shall not using setcdr or we can replace
-         ;; other things like markers
-         (setcdr value (,operation (cdr value) (* 0.0001 (expt 2 (- 21 zoom)))))
+         (plist-put plist :center
+                    (list "" (append
+                              coordinates
+                              (list
+                               (cons ,lat-or-lng
+                                     (,operation
+                                      (cdr value)
+                                      (* 0.00008 (expt 2 (- google-maps-static-maximum-zoom zoom)))))))))
          (apply 'google-maps-static-show plist)))))
 
 (google-maps-static-defun-move "north" 'lat +)
