@@ -54,11 +54,13 @@
 
 (defcustom google-maps-static-buffer-name "*Google Maps*"
   "Name of the Google Maps buffer."
-  :group 'google-maps-static)
+  :group 'google-maps-static
+  :type 'string)
 
 (defcustom google-maps-static-default-zoom 15
   "Default zoom level when calling `google-maps-static-zoom' with no argument."
-  :group 'google-maps-static)
+  :group 'google-maps-static
+  :type 'integer)
 
 (defconst google-maps-static-uri
   "http://maps.google.com/maps/api/staticmap"
