@@ -407,6 +407,17 @@ This function returns the buffer where the map is displayed."
   (interactive)
   (kill-new (google-maps-static-build-url google-maps-static-params)))
 
+(defun google-maps-static-geocode (location)
+  "Geocode a location.
+If location is already a list, it's geocode. Otherwise, geocode the string and returns
+
+ (FORMATTED_ADDRESS ((lat . LATITUDE) (lng . LONGITUDE)))"
+  (if (listp location)
+      location
+    (let ((data (google-maps-geocode-location location)))
+      (list (cdr (assoc 'formatted_address data))
+            (cdr (assoc 'location (assoc 'geometry data)))))))
+
 (defun google-maps-static-add-visible (location)
   "Make LOCATION visible on the map."
   (interactive
@@ -416,10 +427,7 @@ This function returns the buffer where the map is displayed."
          (visible (plist-get plist :visible)))
     (apply 'google-maps-static-show
            (plist-put plist :visible (add-to-list 'visible
-                                                  (cdr
-                                                   (assoc
-                                                    'formatted_address
-                                                    (google-maps-geocode-location location))))))))
+                                                  (google-maps-static-geocode location))))))
 
 (defun google-maps-static-remove-visible (location)
   "Remove a visible LOCATION on the map."
@@ -452,7 +460,7 @@ specify SIZE and COLOR of the LABEL."
     (apply 'google-maps-static-show
            (plist-put plist :markers
                       (append (plist-get plist :markers)
-                              `(((,(cdr (assoc 'formatted_address (google-maps-geocode-location location))))
+                              `(((,(google-maps-static-geocode location))
                                  . (:label ,label :size ,size :color ,color))))))))
 
 (defun google-maps-static-remove-marker (label)
@@ -485,12 +493,9 @@ string, it will remove centering."
   (interactive
    (list
     (read-string "Location to center the map on: ")))
-  (let* ((plist google-maps-static-params)
-         (center (google-maps-geocode-location location))
-         (address (cdr (assoc 'formatted_address center)))
-         (location (cdr (assoc 'location (assoc 'geometry center)))))
+  (let ((plist google-maps-static-params))
     (apply 'google-maps-static-show
-           (plist-put plist :center `(,address ,location)))))
+           (plist-put plist :center (google-maps-static-geocode location)))))
 
 (defun google-maps-static-center-remove ()
   "Do not center the map."
