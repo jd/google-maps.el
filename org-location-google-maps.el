@@ -70,7 +70,8 @@ location. Current location is determined using
   "Set location property to LOCATION for current entry using Google Geocoding API."
   (interactive
    (list (read-string "Location: ")))
-  (org-set-property "LOCATION" (google-maps-geocode-location location)))
+  (org-set-property "LOCATION" (cdr (assoc 'formatted_address
+                                           (google-maps-geocode-location location)))))
 
 (define-key org-mode-map "\C-c\M-L" 'org-location-google-geocode-set)
 
