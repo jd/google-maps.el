@@ -516,7 +516,7 @@ string, it will remove centering."
                    (where-is 'google-maps-static-center t)
                    (buffer-string)))))
        (unless (listp center)
-         (error ("The center location has no coordinates.")))
+         (error "The center location has no coordinates."))
        (unless zoom
          (error (format
                  "The map has no zoom level. Press %s to set a zoom level."
@@ -527,6 +527,8 @@ string, it will remove centering."
          (setcar center "")
          ;; Zoom ratio seems to be 2, so `2^zoom * value' move the map quite
          ;; correctly.
+         ;; FIXME THIS IS A BUG, we shall not using setcdr or we can replace
+         ;; other things like markers
          (setcdr value (,operation (cdr value) (* 0.0001 (expt 2 (- 21 zoom)))))
          (apply 'google-maps-static-show plist)))))
 
