@@ -34,7 +34,8 @@
 
 (defcustom google-maps-default-sensor nil
   "Default sensor value for map request."
-  :group 'google-maps)
+  :group 'google-maps
+  :type 'boolean)
 
 (defcustom google-maps-cache-ttl 86400
   "Defaut TTL for cache, in seconds."
