@@ -36,6 +36,11 @@
   "Default sensor value for map request."
   :group 'google-maps)
 
+(defcustom google-maps-cache-ttl 86400
+  "Defaut TTL for cache, in seconds."
+  :group 'google-maps
+  :type 'integer)
+
 (defun mapconcat-if-not (predicate function sequence separator)
   "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings if they validate PREDICATE.
 In between each pair of results, stick in SEPARATOR.  Thus, \" \"
@@ -60,18 +65,49 @@ string."
     (plist-put plist :sensor google-maps-default-sensor))
   plist)
 
-(defun google-maps-retrieve-data (url)
-  "Retrieve URL and return its data as string."
-  (let* ((buffer (url-retrieve-synchronously url))
+(defun google-maps-static-cache-expired (url expire-time)
+  "Check if URL is cached for more than EXPIRE-TIME."
+  (cond (url-standalone-mode
+         (not (file-exists-p (url-cache-create-filename url))))
+        (t (let ((cache-time (url-is-cached url)))
+             (if cache-time
+                 (time-less-p
+                  (time-add
+                   cache-time
+                   (seconds-to-time expire-time))
+                  (current-time))
+               t)))))
+
+(defun google-maps-static-cache-fetch (url)
+  "Fetch URL from the cache."
+  (with-current-buffer (generate-new-buffer " *temp*")
+    (url-cache-extract (url-cache-create-filename url))
+    (current-buffer)))
+
+(defun google-maps-retrieve-data (url &optional expire-time)
+  "Retrieve URL and return its data as string.
+If EXPIRE-TIME is set, the data will be fetched from the cache if
+their are not older than EXPIRE-TIME seconds. Otherwise, they
+will be fetched and then cached. Therefore, setting EXPIRE-TIME
+to 0 force a cache renewal."
+  (let* ((expired (if expire-time
+                      (google-maps-static-cache-expired url expire-time)
+                    t))
+         (buffer (if expired
+                     (url-retrieve-synchronously url)
+                   (google-maps-static-cache-fetch url)))
          data)
     (with-current-buffer buffer
       (goto-char (point-min))
       (search-forward "\n\n")
-      (when (string-match
-             "^Content-Type: .+; charset=UTF-8$"
-             (buffer-substring (point-min) (point)))
-        (set-buffer-multibyte t))
+      (if (string-match-p
+           "^Content-Type: .+; charset=UTF-8$"
+           (buffer-substring (point-min) (point)))
+          (set-buffer-multibyte t)
+        (set-buffer-multibyte nil))
       (setq data (buffer-substring (point) (point-max)))
+      (when (and expired expire-time)
+        (url-store-in-cache (current-buffer)))
       (kill-buffer (current-buffer))
       data)))
 

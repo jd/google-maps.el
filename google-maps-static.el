@@ -159,10 +159,13 @@ PATHS should have the form
     (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))
     plist))
 
-(defun google-maps-static-refresh ()
+(defun google-maps-static-refresh (&optional force)
   "Redisplay the map."
-  (interactive)
-  (apply 'google-maps-static-show google-maps-static-params))
+  (interactive "P")
+  (let ((google-maps-cache-ttl (if force
+                                   0
+                                 google-maps-cache-ttl)))
+  (apply 'google-maps-static-show google-maps-static-params)))
 
 (defun google-maps-static-build-plist (plist)
   "Build a property list based on PLIST."
@@ -310,7 +313,8 @@ PLIST can contains this properties:
            ((\"Location 1\" \"Location 2\" ... \"Location N \") . options)
            OPTIONS is not mandatory. If set, it should be a list
            with any number of options as above:
-           (:fillcolor \"blue\" :weight 5 :color \"yellow\")."
+           (:fillcolor \"blue\" :weight 5 :color \"yellow\").
+ :cache    Cache TTL, default to `google-maps-cache-ttl'."
   (let ((buffer (get-buffer-create google-maps-static-buffer-name)))
     (unless (eq (current-buffer) buffer)
       (switch-to-buffer-other-window buffer))
@@ -322,7 +326,7 @@ PLIST can contains this properties:
       (delete-region (point-min) (point-max))
       (google-maps-static-insert-image-at-point
        (point-min)
-       (google-maps-retrieve-data url)
+       (google-maps-retrieve-data url (or (plist-get plist :cache) google-maps-cache-ttl))
        (plist-get plist :format)
        (google-maps-static-build-info-string plist)))))
 
