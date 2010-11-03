@@ -320,7 +320,9 @@ PLIST can contains this properties:
            OPTIONS is not mandatory. If set, it should be a list
            with any number of options as above:
            (:fillcolor \"blue\" :weight 5 :color \"yellow\").
- :cache    Cache TTL, default to `google-maps-cache-ttl'."
+ :cache    Cache TTL, default to `google-maps-cache-ttl'.
+
+This function returns the buffer where the map is displayed."
   (let ((buffer (get-buffer-create google-maps-static-buffer-name)))
     (unless (eq (current-buffer) buffer)
       (switch-to-buffer-other-window buffer))
@@ -334,7 +336,8 @@ PLIST can contains this properties:
        (point-min)
        (google-maps-retrieve-data url (or (plist-get plist :cache) google-maps-cache-ttl))
        (plist-get plist :format)
-       (google-maps-static-build-info-string plist)))))
+       (google-maps-static-build-info-string plist)))
+    buffer))
 
 (defvar google-maps-static-mode-map
   (let ((map (make-sparse-keymap)))
