@@ -67,6 +67,12 @@
   :group 'google-maps-static
   :type 'float)
 
+(defcustom google-maps-static-home-marker ?H
+  "Character used to mark home.
+Used by `google-maps-static-add-home-marker'."
+  :group 'google-maps-static
+  :type 'character)
+
 (defconst google-maps-static-uri
   "http://maps.google.com/maps/api/staticmap"
   "Google Maps API server.")
@@ -356,6 +362,7 @@ This function returns the buffer where the map is displayed."
     (define-key map (kbd "C") 'google-maps-static-center-remove)
     (define-key map (kbd "t") 'google-maps-static-set-maptype)
     (define-key map (kbd "g") 'google-maps-static-refresh)
+    (define-key map (kbd "h") 'google-maps-static-add-home-marker)
     (define-key map (kbd "<up>") 'google-maps-static-move-north)
     (define-key map (kbd "<down>") 'google-maps-static-move-south)
     (define-key map (kbd "<left>") 'google-maps-static-move-west)
@@ -486,6 +493,21 @@ If TIMES is negative, then remove this number of markers."
         (call-interactively 'google-maps-static-add-marker))
     (dotimes (x (abs times))
       (call-interactively 'google-maps-static-remove-marker))))
+
+(defun google-maps-static-add-home-marker ()
+  "Add a marker for home.
+It uses `calendar-location-name', `calendar-latitude' and
+`calendar-longitude' to determine where home is."
+  (interactive)
+  (require 'solar)
+  (if (and calendar-latitude
+           calendar-longitude
+           calendar-location-name)
+      (google-maps-static-add-marker `(,(eval calendar-location-name)
+                                       ((lat . ,(calendar-latitude))
+                                        (lng . ,(calendar-longitude))))
+                                     google-maps-static-home-marker)
+    (error "Unable to determine home.")))
 
 (defun google-maps-static-center (location)
   "Center the map on a LOCATION. If LOCATION is nil or an empty

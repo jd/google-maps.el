@@ -33,36 +33,35 @@
 (require 'org)
 (require 'org-agenda)
 
+(defun org-google-maps (location &optional with-current-location)
+  "Run Google Maps for LOCATION.
+If WITH-CURRENT-LOCATION prefix is set, add a marker with current
+location."
+  (let ((buffer (google-maps location)))
+    (when with-current-location
+      (with-current-buffer buffer
+        (google-maps-static-add-home-marker)))))
+
 (defun org-location-google-maps (&optional with-current-location)
   "Show Google Map for location of an Org entry in an org buffer.
 If WITH-CURRENT-LOCATION prefix is set, add a marker with current
-location. Current location is determined using
-`calendar-location-name', `calendar-latitude' and
-`calendar-longitude' variable."
+location."
   (interactive "P")
   (let ((location (org-entry-get nil "LOCATION" t)))
     (when location
-      (let ((buffer (google-maps location)))
-        (when (and with-current-location
-                   calendar-latitude
-                   calendar-longitude
-                   calendar-location-name)
-          (google-maps-static-add-marker `(,(eval calendar-location-name)
-                                            ((lat . ,(calendar-latitude))
-                                             (lng . ,(calendar-longitude))))
-                                         ?H))))))
+      (org-google-maps location with-current-location))))
 
 (define-key org-mode-map "\C-c\M-l" 'org-location-google-maps)
 
-(defun org-agenda-location-google-maps ()
+(defun org-agenda-location-google-maps (&optional with-current-location)
   "Show Google Map for location of an Org entry in an org-agenda buffer."
-  (interactive)
+  (interactive "P")
   (let ((location
          (save-window-excursion
            (org-agenda-goto)
            (org-entry-get nil "LOCATION" t))))
     (when location
-      (google-maps location))))
+      (org-google-maps location with-current-location))))
 
 (define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps)
 
