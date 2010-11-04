@@ -29,6 +29,9 @@
 (require 'google-maps-geocode)
 (require 'google-maps-static)
 
+(defvar google-maps-history nil
+  "History for `google-maps' prompt.")
+
 ;;;###autoload
 (defun google-maps (location &optional no-geocoding)
   "Run Google Maps on LOCATION.
@@ -39,7 +42,7 @@ and do not ask the user for a more precise location."
     (if (and transient-mark-mode mark-active)
 	(buffer-substring-no-properties
          (region-beginning) (region-end))
-      (read-string "Location: "))))
+      (read-string "Location: " nil 'google-maps-history))))
   (let ((location (if no-geocoding
                       location
                     (let ((location (google-maps-geocode-location location)))
