@@ -541,6 +541,14 @@ string, it will remove centering."
     (with-current-buffer (google-maps-static-event-to-buffer event)
       (funcall 'google-maps-static-zoom-out)))
 
+(defun google-maps-static-save (filename)
+  "Save the map into FILENAME."
+  (interactive (list (read-file-name "Save the map to: ")))
+  (let ((data (plist-get (cdr (get-text-property (point-min) 'display)) :data)))
+    (with-temp-buffer
+      (insert data)
+      (write-file filename))))
+
 (defun google-maps-static-set-maptype (maptype)
   "Set map type to MAPTYPE."
   (interactive
