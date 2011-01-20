@@ -66,7 +66,7 @@ string."
     (plist-put plist :sensor google-maps-default-sensor))
   plist)
 
-(defun google-maps-static-cache-expired (url expire-time)
+(defun google-maps-cache-expired (url expire-time)
   "Check if URL is cached for more than EXPIRE-TIME."
   (cond (url-standalone-mode
          (not (file-exists-p (url-cache-create-filename url))))
@@ -92,7 +92,7 @@ their are not older than EXPIRE-TIME seconds. Otherwise, they
 will be fetched and then cached. Therefore, setting EXPIRE-TIME
 to 0 force a cache renewal."
   (let* ((expired (if expire-time
-                      (google-maps-static-cache-expired url expire-time)
+                      (google-maps-cache-expired url expire-time)
                     t))
          (buffer (if expired
                      (url-retrieve-synchronously url)
