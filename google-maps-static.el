@@ -567,19 +567,15 @@ string, it will remove centering."
             (center (plist-get plist :center))
             (zoom (plist-get plist :zoom)))
        (unless center
-         (error (format
-                 "The map is not centered. Press %s to center."
-                 (with-temp-buffer
-                   (where-is 'google-maps-static-center t)
-                   (buffer-string)))))
+         (error
+          (substitute-command-keys
+           "The map is not centered. Press \\[google-maps-static-center] to center.")))
        (unless (listp center)
          (error "The center location has no coordinates."))
        (unless zoom
-         (error (format
-                 "The map has no zoom level. Press %s to set a zoom level."
-                 (with-temp-buffer
-                   (where-is 'google-maps-static-zoom t)
-                   (buffer-string)))))
+         (error
+          (substitute-command-keys
+           "The map has no zoom level. Press \\[google-maps-static-zoom] to set a zoom level.")))
        (let* ((coordinates (copy-list (cadr center)))
               (value (assoc ,lat-or-lng coordinates))
               (coordinates (delq value coordinates)))
