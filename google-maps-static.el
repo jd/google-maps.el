@@ -354,6 +354,7 @@ This function returns the buffer where the map is displayed."
     (define-key map (kbd "<") 'google-maps-static-zoom-out)
     (define-key map (kbd ",") 'google-maps-static-zoom-out)
     (define-key map (kbd "z") 'google-maps-static-zoom)
+    (define-key map (kbd "Z") 'google-maps-static-zoom-remove)
     (define-key map (kbd "q") 'google-maps-static-quit)
     (define-key map (kbd "w") 'google-maps-static-copy-url)
     (define-key map (kbd "m") 'google-maps-static-manage-marker)
@@ -381,14 +382,24 @@ This function returns the buffer where the map is displayed."
 
 (defun google-maps-static-zoom (level)
   "Zoom a Google map."
-  (interactive "P")
-  (let ((plist google-maps-static-params)
-        (level (or level google-maps-static-default-zoom)))
+  (interactive (list (or (when current-prefix-arg
+                           (prefix-numeric-value current-prefix-arg))
+                         (read-number "Zoom level: " google-maps-static-default-zoom))))
+  (let ((plist google-maps-static-params))
     (apply 'google-maps-static-show
-           (plist-put plist
-                      :zoom
-                      (max (min level google-maps-static-maximum-zoom)
-                           google-maps-static-minimum-zoom)))))
+           (if level
+               (plist-put plist
+                          :zoom
+                          (max (min level google-maps-static-maximum-zoom)
+                               google-maps-static-minimum-zoom))
+             (plist-put plist :zoom nil)))))
+
+(defun google-maps-static-zoom-remove ()
+  "Remove zoom level from a Google map."
+  (interactive)
+  (let ((plist google-maps-static-params))
+    (apply 'google-maps-static-show
+           (google-maps-plist-delete plist :zoom))))
 
 (defun google-maps-static-zoom-in ()
   "Zoom a Google map in."
