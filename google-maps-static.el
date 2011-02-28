@@ -393,14 +393,14 @@ This function returns the buffer where the map is displayed."
 (defun google-maps-static-zoom-in ()
   "Zoom a Google map in."
   (interactive)
-  (unless (plist-member google-maps-static-params :zoom)
+  (unless (plist-get google-maps-static-params :zoom)
     (error "Current zoom level is unknown, cannot zoom in."))
   (google-maps-static-zoom (1+ (plist-get google-maps-static-params :zoom))))
 
 (defun google-maps-static-zoom-out ()
   "Zoom a Google map out."
   (interactive)
-  (unless (plist-member google-maps-static-params :zoom)
+  (unless (plist-get google-maps-static-params :zoom)
     (error "Current zoom level is unknown, cannot zoom out."))
   (google-maps-static-zoom (1- (plist-get google-maps-static-params :zoom))))
 
