@@ -56,6 +56,15 @@ string."
                sequence))
    separator))
 
+(defun google-maps-plist-delete (plist property)
+  "Delete PROPERTY from PLIST."
+  (let (p)
+    (while plist
+      (unless (eq property (car plist))
+        (setq p (plist-put p (car plist) (nth 1 plist))))
+      (setq plist (cddr plist)))
+    p))
+
 (defun google-maps-symbol-to-property (symbol)
   "Transform SYMBOL to :SYMBOL."
   (intern-soft (concat ":" (symbol-name symbol))))
