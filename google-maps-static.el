@@ -373,6 +373,41 @@ This function returns the buffer where the map is displayed."
     map)
   "Keymap for `google-maps-static-mode'.")
 
+(require 'easymenu)
+(defun google-maps-check-maptype (mtype &optional default)
+  "Helper function. Checks whether :maptype is MTYPE."
+  (let ((maptype (plist-get google-maps-static-params :maptype)))
+    (if maptype
+        (string= maptype mtype)
+        default)))
+
+(easy-menu-define google-maps-static-mode-menu google-maps-static-mode-map
+  "Google Maps Menu"
+  '("Google Maps"
+    ["Zoom In" google-maps-static-zoom-in t]
+    ["Zoom Out" google-maps-static-zoom-out t]
+    ["Zoom" google-maps-static-zoom t]
+    "--"
+    ["Manage Marker" google-maps-static-manage-marker t]
+    ["Manage Visible" google-maps-static-manage-visible t]
+    ["Add Home Marker" google-maps-static-add-home-marker t]
+    ["Center" google-maps-static-center t]
+    ["Center Remove" google-maps-static-center-remove t]
+    "--"
+    ["Move North" google-maps-static-move-north t]
+    ["Move South" google-maps-static-move-south t]
+    ["Move East" google-maps-static-move-east t]
+    ["Move West" google-maps-static-move-west t]
+    "--"
+    ("Map Type"
+     ["Roadmap" (google-maps-static-set-maptype "roadmap") :style radio :selected (google-maps-check-maptype "roadmap" t)]
+     ["Satellite" (google-maps-static-set-maptype "satellite") :style radio :selected (google-maps-check-maptype "satellite")]
+     ["Hybrid" (google-maps-static-set-maptype "hybrid") :style radio :selected (google-maps-check-maptype "hybrid")]
+     ["Terrain" (google-maps-static-set-maptype "terrain") :style radio :selected (google-maps-check-maptype "terrain")])
+    ["Copy URL" google-maps-static-copy-url t]
+    ["Refresh" google-maps-static-refresh t]
+    ["Quit" google-maps-static-quit t]))
+
 ;;;###autoload
 (define-derived-mode google-maps-static-mode fundamental-mode "Google Maps"
   "A major mode for Google Maps service"
