@@ -59,7 +59,10 @@ location."
   (let ((location
          (save-window-excursion
            (org-agenda-goto)
-           (org-entry-get nil "LOCATION" t))))
+           (org-entry-get nil
+                          (if (boundp 'org-contacts-address-property)
+                              org-contacts-address-property
+                            "LOCATION" t)))))
     (when location
       (org-google-maps location with-current-location))))
 
