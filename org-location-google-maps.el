@@ -33,6 +33,25 @@
 (require 'org)
 (require 'org-agenda)
 
+(defcustom org-google-maps-location-properties `("LOCATION"
+						 ,(if (boundp 'org-contacts-address-property)
+						     org-contacts-address-property
+						   "ADDRESS"))
+  "List of ORG properties storing location informations.
+'LOCATION' store GPS coordinates.
+'ADDRESS' or 'org-contacts-address-property' store Google geocoded address.")
+
+(defun org-google-maps-get-location ()
+  "Return the location information of the current entry.
+The first defined property of
+'org-google-maps-location-properties' is used."
+  (let ((properties org-google-maps-location-properties)
+	location)
+    (while (and properties (null location))
+      (setq location (org-entry-get nil (car properties) t))
+      (setq properties (cdr properties)))
+    location))
+
 (defun org-google-maps (location &optional with-current-location)
   "Run Google Maps for LOCATION.
 If WITH-CURRENT-LOCATION prefix is set, add a marker with current
@@ -47,7 +66,7 @@ location."
 If WITH-CURRENT-LOCATION prefix is set, add a marker with current
 location."
   (interactive "P")
-  (let ((location (org-entry-get nil "LOCATION" t)))
+  (let ((location (org-google-maps-get-location)))
     (when location
       (org-google-maps location with-current-location))))
 
@@ -59,21 +78,20 @@ location."
   (let ((location
          (save-window-excursion
            (org-agenda-goto)
-           (org-entry-get nil
-                          (if (boundp 'org-contacts-address-property)
-                              org-contacts-address-property
-                            "LOCATION" t)))))
+           (org-google-maps-get-location))))
     (when location
       (org-google-maps location with-current-location))))
 
 (define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps)
 
 (defun org-location-google-geocode-set (location)
-  "Set location property to LOCATION for current entry using Google Geocoding API."
+  "Set address property to LOCATION for current entry using Google Geocoding API."
   (interactive
    (list (read-string "Location: ")))
-  (org-set-property "LOCATION" (cdr (assoc 'formatted_address
-                                           (google-maps-geocode-location location)))))
+  (org-set-property (if (boundp 'org-contacts-address-property)
+			org-contacts-address-property
+		      "ADDRESS") (cdr (assoc 'formatted_address
+					  (google-maps-geocode-location location)))))
 
 (define-key org-mode-map "\C-c\M-L" 'org-location-google-geocode-set)
 
