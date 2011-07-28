@@ -33,13 +33,16 @@
 (require 'org)
 (require 'org-agenda)
 
-(defcustom org-google-maps-location-properties `("LOCATION"
-						 ,(if (boundp 'org-contacts-address-property)
+(defcustom org-google-maps-location-properties '("LOCATION"
+						 (if (boundp 'org-contacts-address-property)
 						     org-contacts-address-property
 						   "ADDRESS"))
-  "List of ORG properties storing location informations.
+  "Evaluated list of ORG properties storing location informations.
 'LOCATION' store GPS coordinates.
-'ADDRESS' or 'org-contacts-address-property' store Google geocoded address.")
+'ADDRESS' or 'org-contacts-address-property' store Google geocoded address.
+
+Each element of the list is evaluated at run time by
+'org-google-maps-get-location'.")
 
 (defun org-google-maps-get-location ()
   "Return the location information of the current entry.
@@ -48,7 +51,7 @@ The first defined property of
   (let ((properties org-google-maps-location-properties)
 	location)
     (while (and properties (null location))
-      (setq location (org-entry-get nil (car properties) t))
+      (setq location (org-entry-get nil (eval (car properties)) t))
       (setq properties (cdr properties)))
     location))
 
