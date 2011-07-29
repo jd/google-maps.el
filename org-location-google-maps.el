@@ -33,12 +33,16 @@
 (require 'org)
 (require 'org-agenda)
 
-(defcustom org-google-maps-location-properties '("LOCATION"
+(defcustom org-google-maps-location-properties '((if (boundp 'org-contacts-coordinates-property)
+						     org-contacts-coordinates-property
+						   "COORDINATES")
+						 "LOCATION"
 						 (if (boundp 'org-contacts-address-property)
 						     org-contacts-address-property
 						   "ADDRESS"))
   "Evaluated list of ORG properties storing location informations.
-'LOCATION' store GPS coordinates.
+'COORDINATES' or 'org-contacts-coordinates-property' store GPS coordinates.
+'LOCATION' store GPS coordinates, for backward compatibility.
 'ADDRESS' or 'org-contacts-address-property' store Google geocoded address.
 
 Each element of the list is evaluated at run time by
@@ -87,15 +91,35 @@ location."
 
 (define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps)
 
-(defun org-location-google-geocode-set (location)
-  "Set address property to LOCATION for current entry using Google Geocoding API."
+(defun org-address-google-geocode-set (location)
+  "Set address property to LOCATION address for current entry using Google Geocoding API."
   (interactive
    (list (read-string "Location: ")))
   (org-set-property (if (boundp 'org-contacts-address-property)
 			org-contacts-address-property
-		      "ADDRESS") (cdr (assoc 'formatted_address
-					  (google-maps-geocode-location location)))))
+		      "ADDRESS")
+		    (cdr (assoc 'formatted_address
+				(google-maps-geocode-location location)))))
 
-(define-key org-mode-map "\C-c\M-L" 'org-location-google-geocode-set)
+(define-key org-mode-map "\C-c\M-A" 'org-address-google-geocode-set)
+
+(define-obsolete-function-alias
+  'org-location-google-geocode-set 
+  'org-address-google-geocode-set
+  "2011-07-28")
+
+(define-key org-mode-map "\C-c\M-L" 'org-address-google-geocode-set)
+
+(defun org-coordinates-google-geocode-set (location)
+  "Set coordinates property to LOCATION coordinates for current entry using Google Geocoding API."
+  (interactive
+   (list (read-string "Location: ")))
+  (org-set-property (if (boundp 'org-contacts-coordinates-property)
+			org-contacts-coordinates-property
+		      "COORDINATES")
+		    (mapconcat 'number-to-string
+			       (google-maps-geocode-location->coordinates location) ",")))
+
+(define-key org-mode-map "\C-c\M-c" 'org-coordinates-google-geocode-set)
 
 (provide 'org-location-google-maps)

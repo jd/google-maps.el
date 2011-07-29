@@ -117,6 +117,18 @@ If there is several results, the user is asked to pick one via
     (google-maps-geocode-results->one-result
      (google-maps-geocode-request->results req))))
 
+(defun google-maps-geocode-location->coordinates (location)
+  "Return a list containing latitude and longitude."
+  (let ((geocode-location (google-maps-geocode-location location))
+	latitude longitude)
+    (if (null (assoc 'geometry geocode-location))
+	(error (format "No geometry information for location: %s" location)))
+    (setq latitude (cdr (assoc 'lat (assoc 'location (assoc 'geometry geocode-location)))))
+    (setq longitude (cdr (assoc 'lng (assoc 'location (assoc 'geometry geocode-location)))))
+    (if (or (null latitude) (null longitude))
+	(error (format "Null location coordinates: %s,%s" latitude longitude)))
+    (list latitude longitude)))
+
 ;;;###autoload
 (defun google-maps-geocode-replace-region (beg end)
   "Geocode region and replace it with a more accurate result."
