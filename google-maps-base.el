@@ -112,6 +112,7 @@ to 0 force a cache renewal."
       (search-forward "\n\n")
       (let ((headers (buffer-substring (point-min) (point))))
         (unless (string-match-p "^HTTP/1.1 200 OK" headers)
+          (kill-buffer)
           (error "Unable to fetch data"))
         (if (string-match-p "^Content-Type: .+; charset=UTF-8$" headers)
             (set-buffer-multibyte t)
