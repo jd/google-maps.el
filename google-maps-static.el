@@ -181,21 +181,24 @@ PATHS should have the form
 (defun google-maps-static-build-plist (plist)
   "Build a property list based on PLIST."
   ;; Make all markers upper case
-  (let ((markers (plist-get plist :markers)))
-    (google-maps-static-set-size
-     (google-maps-build-plist
-      (if markers
-          (plist-put plist :markers
-                     (mapcar
-                      (lambda (marker)
-                        (let ((props (cdr marker)))
-                          (when props
-                            (let ((label (plist-get props :label)))
-                              (when label
-                                (plist-put props :label (upcase label))))))
-                        marker)
-                      markers))
-        plist)))))
+  (let ((markers (plist-get plist :markers))
+	(set-size (if (or (not (plist-get plist :width)) (not (plist-get plist :height)))
+		      'google-maps-static-set-size
+		    'identity)))
+    (funcall set-size
+	     (google-maps-build-plist
+	      (if markers
+		  (plist-put plist :markers
+			     (mapcar
+			      (lambda (marker)
+				(let ((props (cdr marker)))
+				  (when props
+				    (let ((label (plist-get props :label)))
+				      (when label
+					(plist-put props :label (upcase label))))))
+				marker)
+			      markers))
+		plist)))))
 
 (defun google-maps-static-build-url (plist)
   "Build a URL to request a static Google Map."
