@@ -126,8 +126,8 @@ location."
   (define-key org-agenda-mode-map "\C-c\M-l" 'org-location-google-maps))
 
 ;;;###autoload(eval-after-load "org" '(org-google-maps-key-bindings))
-(org-google-maps-key-bindings)
+(eval-after-load "org" '(org-google-maps-key-bindings))
 ;;;###autoload(eval-after-load "org-agenda" '(org-google-agenda-maps-key-bindings))
-(org-agenda-google-maps-key-bindings)
+(eval-after-load "org-agenda" '(org-google-agenda-maps-key-bindings))
 
 (provide 'org-location-google-maps)
