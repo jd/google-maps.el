@@ -68,6 +68,7 @@ location."
       (with-current-buffer buffer
         (google-maps-static-add-home-marker)))))
 
+;;;###autoload
 (defun org-location-google-maps (&optional with-current-location)
   "Show Google Map for location of an Org entry in an org buffer.
 If WITH-CURRENT-LOCATION prefix is set, add a marker with current
@@ -77,8 +78,7 @@ location."
     (when location
       (org-google-maps location with-current-location))))
 
-(define-key org-mode-map "\C-c\M-l" 'org-location-google-maps)
-
+;;;###autoload
 (defun org-agenda-location-google-maps (&optional with-current-location)
   "Show Google Map for location of an Org entry in an org-agenda buffer."
   (interactive "P")
@@ -89,8 +89,7 @@ location."
     (when location
       (org-google-maps location with-current-location))))
 
-(define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps)
-
+;;;###autoload
 (defun org-address-google-geocode-set (location)
   "Set address property to LOCATION address for current entry using Google Geocoding API."
   (interactive
@@ -101,15 +100,7 @@ location."
 		    (cdr (assoc 'formatted_address
 				(google-maps-geocode-location location)))))
 
-(define-key org-mode-map "\C-c\M-A" 'org-address-google-geocode-set)
-
-(define-obsolete-function-alias
-  'org-location-google-geocode-set 
-  'org-address-google-geocode-set
-  "2011-07-28")
-
-(define-key org-mode-map "\C-c\M-L" 'org-address-google-geocode-set)
-
+;;;###autoload
 (defun org-coordinates-google-geocode-set (location)
   "Set coordinates property to LOCATION coordinates for current entry using Google Geocoding API."
   (interactive
@@ -120,6 +111,20 @@ location."
 		    (mapconcat 'number-to-string
 			       (google-maps-geocode-location->coordinates location) ",")))
 
-(define-key org-mode-map "\C-c\M-c" 'org-coordinates-google-geocode-set)
+(defun org-google-maps-key-bindings ()
+  (require 'org)
+  (define-key org-mode-map "\C-c\M-c" 'org-coordinates-google-geocode-set)
+  (define-key org-mode-map "\C-c\M-L" 'org-address-google-geocode-set)
+  (define-key org-mode-map "\C-c\M-A" 'org-address-google-geocode-set)
+  (define-key org-mode-map "\C-c\M-l" 'org-location-google-maps))
+
+(defun org-agenda-google-maps-key-bindings ()
+  (require 'org-agenda)
+  (define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps))
+
+;;;###autoload(eval-after-load "org" '(org-google-maps-key-bindings))
+(org-google-maps-key-bindings)
+;;;###autoload(eval-after-load "org-agenda" '(org-google-agenda-maps-key-bindings))
+(org-agenda-google-maps-key-bindings)
 
 (provide 'org-location-google-maps)
