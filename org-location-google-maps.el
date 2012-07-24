@@ -120,7 +120,10 @@ location."
 
 (defun org-agenda-google-maps-key-bindings ()
   (require 'org-agenda)
-  (define-key org-agenda-mode-map "\C-c\M-l" 'org-agenda-location-google-maps))
+  (define-key org-agenda-mode-map "\C-c\M-c" 'org-coordinates-google-geocode-set)
+  (define-key org-agenda-mode-map "\C-c\M-L" 'org-address-google-geocode-set)
+  (define-key org-agenda-mode-map "\C-c\M-A" 'org-address-google-geocode-set)
+  (define-key org-agenda-mode-map "\C-c\M-l" 'org-location-google-maps))
 
 ;;;###autoload(eval-after-load "org" '(org-google-maps-key-bindings))
 (org-google-maps-key-bindings)
