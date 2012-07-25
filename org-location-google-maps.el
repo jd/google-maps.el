@@ -127,7 +127,7 @@ location."
 
 ;;;###autoload(eval-after-load "org" '(org-google-maps-key-bindings))
 (eval-after-load "org" '(org-google-maps-key-bindings))
-;;;###autoload(eval-after-load "org-agenda" '(org-google-agenda-maps-key-bindings))
-(eval-after-load "org-agenda" '(org-google-agenda-maps-key-bindings))
+;;;###autoload(eval-after-load "org-agenda" '(org-agenda-google-maps-key-bindings))
+(eval-after-load "org-agenda" '(org-agenda-google-maps-key-bindings))
 
 (provide 'org-location-google-maps)
