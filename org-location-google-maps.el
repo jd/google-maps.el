@@ -111,6 +111,7 @@ location."
 		    (mapconcat 'number-to-string
 			       (google-maps-geocode-location->coordinates location) ",")))
 
+;;;###autoload
 (defun org-google-maps-key-bindings ()
   (require 'org)
   (define-key org-mode-map "\C-c\M-c" 'org-coordinates-google-geocode-set)
@@ -118,6 +119,7 @@ location."
   (define-key org-mode-map "\C-c\M-A" 'org-address-google-geocode-set)
   (define-key org-mode-map "\C-c\M-l" 'org-location-google-maps))
 
+;;;###autoload
 (defun org-agenda-google-maps-key-bindings ()
   (require 'org-agenda)
   (define-key org-agenda-mode-map "\C-c\M-c" 'org-coordinates-google-geocode-set)
