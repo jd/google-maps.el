@@ -111,7 +111,7 @@ to 0 force a cache renewal."
       (goto-char (point-min))
       (search-forward "\n\n")
       (let ((headers (buffer-substring (point-min) (point))))
-        (unless (string-match-p "^^HTTP/[0-9]\\(?:\.[0-9]\\)+ 200 OK" headers)
+        (unless (string-match-p "^HTTP/[0-9]\\(?:\.[0-9]\\)+ 200 OK" headers)
           (kill-buffer)
           (error "Unable to fetch data"))
         (if (string-match-p "^Content-Type: .+; charset=UTF-8$" headers)
