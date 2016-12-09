@@ -21,7 +21,9 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; None
+
+;; Communicate with the Google Maps Geocoding API.
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -139,3 +141,5 @@ If there is several results, the user is asked to pick one via
     (insert location)))
 
 (provide 'google-maps-geocode)
+
+;;; google-maps-geocode.el ends here

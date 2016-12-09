@@ -21,6 +21,7 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
 ;; All arguments are optional. Here is a full call example:
 ;;
 ;; (google-maps-static-show
@@ -28,19 +29,22 @@
 ;;  :maptype 'hybrid
 ;;  ;; :zoom 5
 ;;  :markers '((("Place Saint-Michel, Paris") . (:label ?M :color "blue"))
-;;             (("Jardin du Luxembourg, Paris" "Parc Montsouris, Paris") . (:label ?P :color "green")))
+;;             (("Jardin du Luxembourg, Paris" "Parc Montsouris, Paris")
+;;              . (:label ?P :color "green")))
 ;;  :visible '("44 rue de l'Ouest, Paris" "Montrouge")
 ;;  :paths '((("Tour Eiffel, Paris" "Arc de triomphe, Paris" "Panthéon, Paris")
 ;;            . (:weight 3 :color "black" :fillcolor "yellow"))))
 ;;
-;; All address can be specified as string, or with a format like this:
+;; All addresses can be specified as a string or in the following format:
 ;;
 ;; (LOCATION_NAME ((lat . LATITUDE) (lng. LONGITUDE)))
 ;;
+
 ;;; TODO:
+
 ;; - Resize map if frame is resized
 ;; - Add interactive code to build path
-;;
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -649,3 +653,5 @@ string, it will remove centering."
 (google-maps-static-defun-move "east" 'lng +)
 
 (provide 'google-maps-static)
+
+;;; google-maps-static.el ends here

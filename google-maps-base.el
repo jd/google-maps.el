@@ -21,8 +21,9 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Functions and data used by Google Maps sub modules.
-;;
+
+;; Functions and data used by Google Maps submodules.
+
 ;;; Code:
 
 (require 'cl-lib)
@@ -145,3 +146,5 @@ PROPERTIES should have form '((property-name . format))."
      separator)))
 
 (provide 'google-maps-base)
+
+;;; google-maps-base.el ends here

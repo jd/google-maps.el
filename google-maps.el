@@ -2,8 +2,12 @@
 
 ;; Copyright (C) 2010 Julien Danjou
 
+;; Package-Requires: ((emacs "24.3"))
 ;; Author: Julien Danjou <julien@danjou.info>
 ;; Keywords: comm
+;; Homepage: https://julien.danjou.info/projects/emacs-packages#google-maps
+
+;; Google Maps requires at least GNU Emacs 24.3.
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -21,7 +25,9 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; None
+
+;; Display Google Maps directly inside Emacs.
+
 ;;; Code:
 
 (require 'google-maps-geocode)
@@ -54,3 +60,5 @@ and do not ask the user for a more precise location."
                              :center location)))
 
 (provide 'google-maps)
+
+;;; google-maps.el ends here

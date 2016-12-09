@@ -21,11 +21,12 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
 ;; Integrate google-maps into org-mode.
 ;;
 ;; This allows you to press C-c M-l on an Org entry to get the Google Map of
 ;; your appointment.
-;;
+
 ;;; Code:
 
 (require 'google-maps)
@@ -133,3 +134,5 @@ location."
 (eval-after-load 'org-agenda '(org-agenda-google-maps-key-bindings))
 
 (provide 'org-location-google-maps)
+
+;;; org-location-google-maps.el ends here
