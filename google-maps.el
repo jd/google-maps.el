@@ -44,7 +44,7 @@ and do not ask the user for a more precise location."
   (interactive
    (list
     (if (and transient-mark-mode mark-active)
-	(buffer-substring-no-properties
+        (buffer-substring-no-properties
          (region-beginning) (region-end))
       (read-string "Location: " nil 'google-maps-history))))
   (let ((location (if no-geocoding

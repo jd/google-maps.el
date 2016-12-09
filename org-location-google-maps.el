@@ -34,13 +34,14 @@
 (require 'org)
 (require 'org-agenda)
 
-(defcustom org-google-maps-location-properties '((if (boundp 'org-contacts-coordinates-property)
-						     org-contacts-coordinates-property
-						   "COORDINATES")
-						 "LOCATION"
-						 (if (boundp 'org-contacts-address-property)
-						     org-contacts-address-property
-						   "ADDRESS"))
+(defcustom org-google-maps-location-properties
+  '((if (boundp 'org-contacts-coordinates-property)
+        org-contacts-coordinates-property
+      "COORDINATES")
+    "LOCATION"
+    (if (boundp 'org-contacts-address-property)
+        org-contacts-address-property
+      "ADDRESS"))
   "Evaluated list of ORG properties storing location informations.
 'COORDINATES' or 'org-contacts-coordinates-property' store GPS coordinates.
 'LOCATION' store GPS coordinates, for backward compatibility.
@@ -54,7 +55,7 @@ Each element of the list is evaluated at run time by
 The first defined property of
 'org-google-maps-location-properties' is used."
   (let ((properties org-google-maps-location-properties)
-	location)
+        location)
     (while (and properties (null location))
       (setq location (org-entry-get nil (eval (car properties)) t))
       (setq properties (cdr properties)))
@@ -96,10 +97,10 @@ location."
   (interactive
    (list (read-string "Location: ")))
   (org-set-property (if (boundp 'org-contacts-address-property)
-			org-contacts-address-property
-		      "ADDRESS")
-		    (cdr (assoc 'formatted_address
-				(google-maps-geocode-location location)))))
+                        org-contacts-address-property
+                      "ADDRESS")
+                    (cdr (assoc 'formatted_address
+                                (google-maps-geocode-location location)))))
 
 ;;;###autoload
 (defun org-coordinates-google-geocode-set (location)
@@ -107,10 +108,10 @@ location."
   (interactive
    (list (read-string "Location: ")))
   (org-set-property (if (boundp 'org-contacts-coordinates-property)
-			org-contacts-coordinates-property
-		      "COORDINATES")
-		    (mapconcat 'number-to-string
-			       (google-maps-geocode-location->coordinates location) ",")))
+                        org-contacts-coordinates-property
+                      "COORDINATES")
+                    (mapconcat 'number-to-string
+                               (google-maps-geocode-location->coordinates location) ",")))
 
 ;;;###autoload
 (defun org-google-maps-key-bindings ()
