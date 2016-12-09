@@ -42,9 +42,8 @@
 ;; - Add interactive code to build path
 ;;
 ;;; Code:
-(eval-when-compile
-  (require 'cl))
 
+(require 'cl-lib)
 (require 'google-maps-geocode)
 (require 'url-util)
 
@@ -496,7 +495,7 @@ If location is already a list, it's geocode. Otherwise, geocode the string and r
          (visible (plist-get plist :visible)))
     (apply 'google-maps-static-show
            (plist-put plist :visible
-                      (remove-if `(lambda (l) (string= l ,location)) visible)))))
+                      (cl-remove-if `(lambda (l) (string= l ,location)) visible)))))
 
 (defun google-maps-static-manage-visible (remove)
   "Add or remove a visible location. If REMOVE is set, remove it."
@@ -527,7 +526,7 @@ specify SIZE and COLOR of the LABEL."
   (let ((plist google-maps-static-params)
         (label (upcase label)))
     (apply 'google-maps-static-show (plist-put plist :markers
-                                               (remove-if
+                                               (cl-remove-if
                                                 (lambda (marker)
                                                   (eq (plist-get (cdr marker) :label) label))
                                                 (plist-get plist :markers))))))
@@ -625,7 +624,7 @@ string, it will remove centering."
          (error
           (substitute-command-keys
            "The map has no zoom level. Press \\[google-maps-static-zoom] to set a zoom level.")))
-       (let* ((coordinates (copy-list (cadr center)))
+       (let* ((coordinates (cl-copy-list (cadr center)))
               (value (assoc ,lat-or-lng coordinates))
               (coordinates (delq value coordinates)))
          ;; Zoom ratio seems to be 2, so `2^zoom * value' move the map quite

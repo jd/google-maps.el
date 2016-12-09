@@ -23,8 +23,6 @@
 ;;; Commentary:
 ;; None
 ;;; Code:
-(eval-when-compile
-  (require 'cl))
 
 (require 'google-maps-geocode)
 (require 'google-maps-static)

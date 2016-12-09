@@ -23,9 +23,8 @@
 ;;; Commentary:
 ;; None
 ;;; Code:
-(eval-when-compile
-  (require 'cl))
 
+(require 'cl-lib)
 (require 'json)
 (require 'google-maps-base)
 
@@ -94,7 +93,7 @@ Valid params are:
            results)
           nil t)))
     ;; Find entry with that location
-    (find-if
+    (cl-find-if
      `(lambda (entry)
         (string= (cdr (assoc 'formatted_address entry))
                  ,location))
@@ -104,10 +103,10 @@ Valid params are:
   "Converts geocoding results list to one result only.
 If there is several results, the user is asked to pick one via
 `google-maps-geocode-results->one-result-picked-by-user'."
-  (case (length results)
+  (pcase (length results)
     (0 nil)
     (1 (elt results 0))
-    (t (google-maps-geocode-results->one-result-picked-by-user results))))
+    (_ (google-maps-geocode-results->one-result-picked-by-user results))))
 
 (defun google-maps-geocode-location (location)
   (let* ((req (google-maps-geocode-request :address location))

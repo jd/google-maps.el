@@ -25,8 +25,7 @@
 ;;
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 (defgroup google-maps nil
   "Google Maps."
@@ -50,10 +49,10 @@ FUNCTION.  SEQUENCE may be a list, a vector, a bool-vector, or a
 string."
   (mapconcat
    'identity
-   (remove-if predicate
-              (mapcar
-               function
-               sequence))
+   (cl-remove-if predicate
+                 (mapcar
+                  function
+                  sequence))
    separator))
 
 (defun google-maps-plist-delete (plist property)
