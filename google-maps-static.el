@@ -21,6 +21,7 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
+
 ;; All arguments are optional. Here is a full call example:
 ;;
 ;; (google-maps-static-show
@@ -28,23 +29,25 @@
 ;;  :maptype 'hybrid
 ;;  ;; :zoom 5
 ;;  :markers '((("Place Saint-Michel, Paris") . (:label ?M :color "blue"))
-;;             (("Jardin du Luxembourg, Paris" "Parc Montsouris, Paris") . (:label ?P :color "green")))
+;;             (("Jardin du Luxembourg, Paris" "Parc Montsouris, Paris")
+;;              . (:label ?P :color "green")))
 ;;  :visible '("44 rue de l'Ouest, Paris" "Montrouge")
 ;;  :paths '((("Tour Eiffel, Paris" "Arc de triomphe, Paris" "Panthéon, Paris")
 ;;            . (:weight 3 :color "black" :fillcolor "yellow"))))
 ;;
-;; All address can be specified as string, or with a format like this:
+;; All addresses can be specified as a string or in the following format:
 ;;
 ;; (LOCATION_NAME ((lat . LATITUDE) (lng. LONGITUDE)))
 ;;
+
 ;;; TODO:
+
 ;; - Resize map if frame is resized
 ;; - Add interactive code to build path
-;;
-;;; Code:
-(eval-when-compile
-  (require 'cl))
 
+;;; Code:
+
+(require 'cl-lib)
 (require 'google-maps-geocode)
 (require 'url-util)
 
@@ -182,23 +185,23 @@ PATHS should have the form
   "Build a property list based on PLIST."
   ;; Make all markers upper case
   (let ((markers (plist-get plist :markers))
-	(set-size (if (or (not (plist-get plist :width)) (not (plist-get plist :height)))
-		      'google-maps-static-set-size
-		    'identity)))
+        (set-size (if (or (not (plist-get plist :width)) (not (plist-get plist :height)))
+                      'google-maps-static-set-size
+                    'identity)))
     (funcall set-size
-	     (google-maps-build-plist
-	      (if markers
-		  (plist-put plist :markers
-			     (mapcar
-			      (lambda (marker)
-				(let ((props (cdr marker)))
-				  (when props
-				    (let ((label (plist-get props :label)))
-				      (when label
-					(plist-put props :label (upcase label))))))
-				marker)
-			      markers))
-		plist)))))
+             (google-maps-build-plist
+              (if markers
+                  (plist-put plist :markers
+                             (mapcar
+                              (lambda (marker)
+                                (let ((props (cdr marker)))
+                                  (when props
+                                    (let ((label (plist-get props :label)))
+                                      (when label
+                                        (plist-put props :label (upcase label))))))
+                                marker)
+                              markers))
+                plist)))))
 
 (defun google-maps-static-build-url (plist)
   "Build a URL to request a static Google Map."
@@ -496,7 +499,7 @@ If location is already a list, it's geocode. Otherwise, geocode the string and r
          (visible (plist-get plist :visible)))
     (apply 'google-maps-static-show
            (plist-put plist :visible
-                      (remove-if `(lambda (l) (string= l ,location)) visible)))))
+                      (cl-remove-if `(lambda (l) (string= l ,location)) visible)))))
 
 (defun google-maps-static-manage-visible (remove)
   "Add or remove a visible location. If REMOVE is set, remove it."
@@ -527,7 +530,7 @@ specify SIZE and COLOR of the LABEL."
   (let ((plist google-maps-static-params)
         (label (upcase label)))
     (apply 'google-maps-static-show (plist-put plist :markers
-                                               (remove-if
+                                               (cl-remove-if
                                                 (lambda (marker)
                                                   (eq (plist-get (cdr marker) :label) label))
                                                 (plist-get plist :markers))))))
@@ -625,7 +628,7 @@ string, it will remove centering."
          (error
           (substitute-command-keys
            "The map has no zoom level. Press \\[google-maps-static-zoom] to set a zoom level.")))
-       (let* ((coordinates (copy-list (cadr center)))
+       (let* ((coordinates (cl-copy-list (cadr center)))
               (value (assoc ,lat-or-lng coordinates))
               (coordinates (delq value coordinates)))
          ;; Zoom ratio seems to be 2, so `2^zoom * value' move the map quite
@@ -650,3 +653,5 @@ string, it will remove centering."
 (google-maps-static-defun-move "east" 'lng +)
 
 (provide 'google-maps-static)
+
+;;; google-maps-static.el ends here

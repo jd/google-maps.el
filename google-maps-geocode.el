@@ -21,11 +21,12 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; None
-;;; Code:
-(eval-when-compile
-  (require 'cl))
 
+;; Communicate with the Google Maps Geocoding API.
+
+;;; Code:
+
+(require 'cl-lib)
 (require 'json)
 (require 'google-maps-base)
 
@@ -94,7 +95,7 @@ Valid params are:
            results)
           nil t)))
     ;; Find entry with that location
-    (find-if
+    (cl-find-if
      `(lambda (entry)
         (string= (cdr (assoc 'formatted_address entry))
                  ,location))
@@ -104,10 +105,10 @@ Valid params are:
   "Converts geocoding results list to one result only.
 If there is several results, the user is asked to pick one via
 `google-maps-geocode-results->one-result-picked-by-user'."
-  (case (length results)
+  (pcase (length results)
     (0 nil)
     (1 (elt results 0))
-    (t (google-maps-geocode-results->one-result-picked-by-user results))))
+    (_ (google-maps-geocode-results->one-result-picked-by-user results))))
 
 (defun google-maps-geocode-location (location)
   (let* ((req (google-maps-geocode-request :address location))
@@ -120,13 +121,13 @@ If there is several results, the user is asked to pick one via
 (defun google-maps-geocode-location->coordinates (location)
   "Return a list containing latitude and longitude."
   (let ((geocode-location (google-maps-geocode-location location))
-	latitude longitude)
+        latitude longitude)
     (if (null (assoc 'geometry geocode-location))
-	(error (format "No geometry information for location: %s" location)))
+        (error (format "No geometry information for location: %s" location)))
     (setq latitude (cdr (assoc 'lat (assoc 'location (assoc 'geometry geocode-location)))))
     (setq longitude (cdr (assoc 'lng (assoc 'location (assoc 'geometry geocode-location)))))
     (if (or (null latitude) (null longitude))
-	(error (format "Null location coordinates: %s,%s" latitude longitude)))
+        (error (format "Null location coordinates: %s,%s" latitude longitude)))
     (list latitude longitude)))
 
 ;;;###autoload
@@ -140,3 +141,5 @@ If there is several results, the user is asked to pick one via
     (insert location)))
 
 (provide 'google-maps-geocode)
+
+;;; google-maps-geocode.el ends here

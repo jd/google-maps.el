@@ -21,12 +21,12 @@
 ;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Functions and data used by Google Maps sub modules.
-;;
+
+;; Functions and data used by Google Maps submodules.
+
 ;;; Code:
 
-(eval-when-compile
-  (require 'cl))
+(require 'cl-lib)
 
 (defgroup google-maps nil
   "Google Maps."
@@ -50,10 +50,10 @@ FUNCTION.  SEQUENCE may be a list, a vector, a bool-vector, or a
 string."
   (mapconcat
    'identity
-   (remove-if predicate
-              (mapcar
-               function
-               sequence))
+   (cl-remove-if predicate
+                 (mapcar
+                  function
+                  sequence))
    separator))
 
 (defun google-maps-plist-delete (plist property)
@@ -146,3 +146,5 @@ PROPERTIES should have form '((property-name . format))."
      separator)))
 
 (provide 'google-maps-base)
+
+;;; google-maps-base.el ends here
