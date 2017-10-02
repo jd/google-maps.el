@@ -173,10 +173,9 @@ PATHS should have the form
      (plist-put plist :height (- (nth 3 edges) (nth 1 edges)))
      :width (- (nth 2 edges) (nth 0 edges) ))))
 
-(defun google-maps-static-refresh (&optional force)
+(defun google-maps-static-refresh (_ignore-auto _noconfirm)
   "Redisplay the map."
-  (interactive "P")
-  (let ((google-maps-cache-ttl (if force
+  (let ((google-maps-cache-ttl (if current-prefix-arg
                                    0
                                  google-maps-cache-ttl)))
   (apply 'google-maps-static-show google-maps-static-params)))
@@ -361,14 +360,14 @@ This function returns the buffer where the map is displayed."
     (define-key map (kbd ",") 'google-maps-static-zoom-out)
     (define-key map (kbd "z") 'google-maps-static-zoom)
     (define-key map (kbd "Z") 'google-maps-static-zoom-remove)
-    (define-key map (kbd "q") 'google-maps-static-quit)
+    ;; (define-key map (kbd "q") 'google-maps-static-quit)
     (define-key map (kbd "w") 'google-maps-static-copy-url)
     (define-key map (kbd "m") 'google-maps-static-manage-marker)
     (define-key map (kbd "v") 'google-maps-static-manage-visible)
     (define-key map (kbd "c") 'google-maps-static-center)
     (define-key map (kbd "C") 'google-maps-static-center-remove)
     (define-key map (kbd "t") 'google-maps-static-set-maptype)
-    (define-key map (kbd "g") 'google-maps-static-refresh)
+    ;; (define-key map (kbd "g") 'google-maps-static-refresh)
     (define-key map (kbd "h") 'google-maps-static-add-home-marker)
     (define-key map (kbd "<up>") 'google-maps-static-move-north)
     (define-key map (kbd "<down>") 'google-maps-static-move-south)
@@ -415,11 +414,12 @@ This function returns the buffer where the map is displayed."
     ["Quit" google-maps-static-quit t]))
 
 ;;;###autoload
-(define-derived-mode google-maps-static-mode fundamental-mode "Google Maps"
+(define-derived-mode google-maps-static-mode special-mode "Google Maps"
   "A major mode for Google Maps service"
   :group 'comm
   (setq cursor-type nil)
-  (setq buffer-read-only t))
+  (setq buffer-read-only t)
+  (set (make-local-variable 'revert-buffer-function) #'google-maps-static-refresh))
 
 (defun google-maps-static-zoom (level)
   "Zoom a Google map."
