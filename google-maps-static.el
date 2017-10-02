@@ -454,11 +454,6 @@ This function returns the buffer where the map is displayed."
     (error "Current zoom level is unknown, cannot zoom out."))
   (google-maps-static-zoom (1- (plist-get google-maps-static-params :zoom))))
 
-(defun google-maps-static-quit ()
-  "Kill Google maps buffer."
-  (interactive)
-  (kill-buffer (current-buffer)))
-
 (defun google-maps-static-copy-url ()
   "Kill Google maps buffer."
   (interactive)
