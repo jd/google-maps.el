@@ -77,7 +77,7 @@ Used by `google-maps-static-add-home-marker'."
   :type 'character)
 
 (defconst google-maps-static-uri
-  "http://maps.google.com/maps/api/staticmap"
+  "https://maps.google.com/maps/api/staticmap"
   "Google Maps API server.")
 
 (defconst google-maps-static-minimum-zoom 0
@@ -205,7 +205,8 @@ PATHS should have the form
 (defun google-maps-static-build-url (plist)
   "Build a URL to request a static Google Map."
   (concat
-   google-maps-static-uri "?"
+   google-maps-static-uri "?key="
+   google-maps-api-key "&"
    (google-maps-urlencode-plist
     plist
     `((format)
