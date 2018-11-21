@@ -31,13 +31,14 @@
 (require 'google-maps-base)
 
 (defconst google-maps-geocode-uri
-  "http://maps.google.com/maps/api/geocode/json"
+  "https://maps.google.com/maps/api/geocode/json"
   "Google Maps Geocoding API server.")
 
 (defun google-maps-geocode-build-url (plist)
   "Built a Google Maps Geocode API request URL from PLIST."
   (concat
-   google-maps-geocode-uri "?"
+   google-maps-geocode-uri "?key="
+   google-maps-api-key "&"
    (google-maps-urlencode-plist
     plist
     '((address . url-hexify-string)

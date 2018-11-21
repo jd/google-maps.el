@@ -42,6 +42,11 @@
   :group 'google-maps
   :type 'integer)
 
+(defcustom google-maps-api-key ""
+  "Google Maps API key."
+  :group 'google-maps
+  :type 'string)
+
 (defun mapconcat-if-not (predicate function sequence separator)
   "Apply FUNCTION to each element of SEQUENCE, and concat the results as strings if they validate PREDICATE.
 In between each pair of results, stick in SEPARATOR.  Thus, \" \"
